@@ -1,4 +1,4 @@
-# 📚 ARCANE SHELF — 로컬 라이브러리
+# 📚 [ARCANE SHELF — 로컬 라이브러리](https://1K0K01.github.io/PDFLibrary)
 
 > **서버 없이 브라우저만으로 작동하는 관리 웹앱**  
 > IndexedDB에 저장 · pdf.js로 표지 생성 · 자동 요약
