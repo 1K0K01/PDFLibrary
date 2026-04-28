@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARCANE SHELF V3.4 — 프리미엄 시나리오 아카이브</title>
+  <title>ARCANE SHELF V3.5 — 프리미엄 시나리오 아카이브</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -73,7 +73,7 @@
       </div>
       <h1 class="font-display font-bold text-2xl tracking-tighter text-white">
         ARCANE <span class="text-purple-500">SHELF</span>
-        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.4</span>
+        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.5</span>
       </h1>
     </div>
     <div class="flex items-center gap-4">
@@ -443,46 +443,45 @@
     }
 
     // ───────────────────────────────────────────────
-    // RENDER SIDEBAR  ← [1] Author filter 추가
+    // RENDER SIDEBAR 
     // ───────────────────────────────────────────────
-    function renderSidebar() {
+function renderSidebar() {
       const container = document.getElementById('sidebar-filters');
-      const rules   = [...new Set(scenarios.map(s => s.rule).filter(r => r && r.trim()))].sort();
-      const authors = [...new Set(scenarios.map(s => s.author).filter(a => a && a.trim()))].sort();
-      const tags    = [...new Set(scenarios.flatMap(s => s.tags).filter(t => t))].sort();
+      const rules = [...new Set(scenarios.map(s => s.rule))].filter(r => r && r !== 'Unknown');
+      const authors = [...new Set(scenarios.map(s => s.author))].filter(a => a && a !== 'Unknown');
+      const tags = [...new Set(scenarios.flatMap(s => s.tags))].filter(t => t);
 
-      const makeBtn = (type, value, label) => {
+      const makeFilterBtn = (type, value, label, showHash = false) => {
         const active = selectedFilter.type === type && selectedFilter.value === value;
-        return `<button onclick="setFilter('${type}','${esc(value)}')" class="sidebar-btn ${active ? 'active' : ''}">${label}</button>`;
-      };
-      const makeTagBtn = (t) => {
-        const active = selectedFilter.type === 'tag' && selectedFilter.value === t;
-        return `<button onclick="setFilter('tag','${esc(t)}')" class="tag-btn ${active ? 'active' : ''}">#${esc(t)}</button>`;
+        const displayLabel = showHash ? `#${esc(label)}` : esc(label);
+        return `<button onclick="setFilter('${type}','${esc(value)}')" 
+                class="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:border-purple-500 transition-all 
+                ${active ? 'bg-purple-500 text-white border-purple-500' : 'text-gray-500'}">
+                ${displayLabel}</button>`;
       };
 
       let html = `
         <div>
-          <p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">전체</p>
-          <button onclick="setFilter('all')" class="sidebar-btn ${selectedFilter.type === 'all' ? 'active' : ''}">
-            전체 보기 <span class="text-gray-600 text-xs">(${scenarios.length})</span>
-          </button>
-        </div>`;
+          <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">View All</h4>
+          <button onclick="setFilter('all')" class="w-full text-left text-sm py-2 px-3 rounded-lg hover:bg-white/5 transition-all ${selectedFilter.type === 'all' ? 'bg-purple-600/20 text-purple-400' : 'text-gray-400'}">전체 보기 (${scenarios.length})</button>
+        </div>
+      `;
 
-      if (rules.length) {
-        html += `<div><p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">By System</p><div class="flex flex-col gap-0.5">`;
-        rules.forEach(r => { html += makeBtn('rule', r, r); });
+      if (rules.length > 0) {
+        html += `<div><h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-3 mt-8">By System</h4><div class="flex flex-wrap gap-2">`;
+        rules.forEach(r => { html += makeFilterBtn('rule', r, r, false); });
         html += `</div></div>`;
       }
 
-      if (authors.length) {
-        html += `<div><p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">By Author</p><div class="flex flex-col gap-0.5">`;
-        authors.forEach(a => { html += makeBtn('author', a, a); });
+      if (authors.length > 0) {
+        html += `<div><h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-3 mt-8">By Author</h4><div class="flex flex-wrap gap-2">`;
+        authors.forEach(a => { html += makeFilterBtn('author', a, a, false); });
         html += `</div></div>`;
       }
 
-      if (tags.length) {
-        html += `<div><p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">Tags</p><div class="flex flex-wrap gap-2">`;
-        tags.slice(0, 20).forEach(t => { html += makeTagBtn(t); });
+      if (tags.length > 0) {
+        html += `<div><h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-3 mt-8">Popular Tags</h4><div class="flex flex-wrap gap-2">`;
+        tags.slice(0, 20).forEach(t => { html += makeFilterBtn('tag', t, t, true); });
         html += `</div></div>`;
       }
 
