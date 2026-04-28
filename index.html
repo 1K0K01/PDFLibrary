@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARCANE SHELF V3.3 — 프리미엄 시나리오 아카이브</title>
+  <title>ARCANE SHELF V3.4 — 프리미엄 시나리오 아카이브</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -21,7 +21,7 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            obsidian: { 900: '#050508', 800: '#0a0a0f', 700: '#12121a' },
+            obsidian: { 900: '#050508', 800: '#0a0a0f', 700: '#12121a', 600: '#1a1a26' },
             arcane: { gold: '#d4af37', purple: '#7c3aed' }
           }
         }
@@ -31,83 +31,123 @@
 
   <style>
     body { background-color: #050508; color: #e2e8f0; overflow: hidden; }
-    .glass-nav { background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .shelf-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.03); }
-    .shelf-card:hover { transform: translateY(-8px); border-color: rgba(124, 58, 237, 0.4); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5); }
-    
-    /* 마크다운 스타일링 */
+    .glass-nav { background: rgba(10,10,15,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .shelf-card { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); border: 1px solid rgba(255,255,255,0.03); }
+    .shelf-card:hover { transform: translateY(-8px); border-color: rgba(124,58,237,0.4); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5); }
     .markdown-body { font-size: 0.95rem; line-height: 1.7; color: #cbd5e1; }
-    .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: #fff; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid #334155; padding-bottom: 0.3rem; }
-    .markdown-body p { margin-bottom: 1rem; }
-    .markdown-body table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; overflow: hidden; }
-    .markdown-body th, .markdown-body td { border: 1px solid #334155; padding: 10px 14px; text-align: left; }
-    .markdown-body th { background: rgba(124, 58, 237, 0.1); color: #a78bfa; font-size: 0.8rem; text-transform: uppercase; }
-    .markdown-body blockquote { border-left: 4px solid #7c3aed; padding-left: 1rem; color: #94a3b8; font-style: italic; }
-
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
+    .markdown-body h1,.markdown-body h2,.markdown-body h3 { color:#fff; font-weight:700; margin-top:1.5rem; margin-bottom:0.75rem; border-bottom:1px solid #334155; padding-bottom:0.3rem; }
+    .markdown-body p { margin-bottom:1rem; }
+    .markdown-body table { width:100%; border-collapse:collapse; margin-bottom:1rem; background:rgba(255,255,255,0.03); border-radius:8px; overflow:hidden; }
+    .markdown-body th,.markdown-body td { border:1px solid #334155; padding:10px 14px; text-align:left; }
+    .markdown-body th { background:rgba(124,58,237,0.1); color:#a78bfa; font-size:0.8rem; text-transform:uppercase; }
+    .markdown-body blockquote { border-left:4px solid #7c3aed; padding-left:1rem; color:#94a3b8; font-style:italic; }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-thumb { background:#1a1a24; border-radius:10px; }
+    ::-webkit-scrollbar-thumb:hover { background:#7c3aed; }
+    .modal-input { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:12px 16px; color:#e2e8f0; outline:none; transition:border-color 0.2s; font-family:'Noto Sans KR',sans-serif; }
+    .modal-input:focus { border-color:#7c3aed; }
+    .modal-label { display:block; font-size:10px; color:#6b7280; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:8px; }
+    .section-title { font-size:10px; color:#a78bfa; font-weight:700; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:16px; padding-bottom:8px; border-bottom:1px solid rgba(124,58,237,0.2); }
+    .sidebar-btn { width:100%; text-align:left; font-size:0.875rem; padding:8px 12px; border-radius:8px; transition:all 0.15s; color:#9ca3af; }
+    .sidebar-btn:hover { background:rgba(255,255,255,0.05); color:#e2e8f0; }
+    .sidebar-btn.active { background:rgba(124,58,237,0.2); color:#a78bfa; }
+    .tag-btn { font-size:10px; padding:4px 8px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); transition:all 0.15s; color:#6b7280; }
+    .tag-btn:hover { border-color:#7c3aed; color:#e2e8f0; }
+    .tag-btn.active { background:#7c3aed; color:#fff; border-color:#7c3aed; }
+    .danger-btn { background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#f87171; padding:10px 16px; border-radius:10px; font-size:0.8rem; font-weight:600; transition:all 0.2s; }
+    .danger-btn:hover { background:rgba(239,68,68,0.2); }
+    .test-btn { display:flex; align-items:center; gap:6px; padding:10px 16px; border-radius:10px; font-size:0.8rem; font-weight:600; border:1px solid rgba(124,58,237,0.4); color:#a78bfa; transition:all 0.2s; background:rgba(124,58,237,0.08); }
+    .test-btn:hover { background:rgba(124,58,237,0.18); }
+    .provider-badge { display:inline-flex; align-items:center; gap:4px; font-size:9px; padding:2px 7px; border-radius:4px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; }
+    #settings-modal, #edit-modal { display:none; }
+    #settings-modal.show, #edit-modal.show { display:flex; }
   </style>
 </head>
 <body class="font-sans antialiased">
 
+  <!-- ═══ NAV ═══ -->
   <nav class="glass-nav sticky top-0 z-50 py-4 px-8 flex justify-between items-center">
     <div class="flex items-center gap-4">
       <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20">
         <span class="font-display font-black text-white text-xl">A</span>
       </div>
-      <h1 class="font-display font-bold text-2xl tracking-tighter text-white">ARCANE <span class="text-purple-500">SHELF</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.3</span></h1>
+      <h1 class="font-display font-bold text-2xl tracking-tighter text-white">
+        ARCANE <span class="text-purple-500">SHELF</span>
+        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.4</span>
+      </h1>
     </div>
-    <div class="flex items-center gap-6">
+    <div class="flex items-center gap-4">
       <input type="text" id="search-input" placeholder="아카이브 검색..." class="bg-obsidian-700 border border-white/5 rounded-full py-2 px-6 focus:outline-none focus:border-purple-500 w-72 text-sm transition-all" />
-      <button id="settings-btn" class="text-gray-400 hover:text-purple-400">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+      <button id="settings-btn" class="text-gray-400 hover:text-purple-400 transition-colors" title="설정">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </button>
     </div>
   </nav>
 
+  <!-- ═══ LAYOUT ═══ -->
   <div class="flex h-[calc(100vh-73px)]">
-    <aside class="w-72 border-r border-white/5 p-8 bg-obsidian-800 overflow-y-auto">
-      <label for="file-input" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-xl shadow-purple-900/20 mb-10">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="w-72 border-r border-white/5 p-8 bg-obsidian-800 overflow-y-auto flex-shrink-0">
+      <label for="file-input" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-xl shadow-purple-900/20 mb-8">
+        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
         시나리오 입고
       </label>
       <input type="file" id="file-input" class="hidden" multiple accept=".pdf" />
-      
-      <div id="sidebar-filters" class="space-y-8">
-        </div>
+
+      <!-- Export / Import shortcut -->
+      <div class="flex gap-2 mb-8">
+        <button onclick="exportLibrary()" class="flex-1 text-xs py-2 px-3 rounded-lg border border-white/10 text-gray-500 hover:text-gray-300 hover:border-white/20 transition-all flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          내보내기
+        </button>
+        <label class="flex-1 text-xs py-2 px-3 rounded-lg border border-white/10 text-gray-500 hover:text-gray-300 hover:border-white/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          불러오기
+          <input type="file" id="import-input" class="hidden" accept=".arcane,.json" />
+        </label>
+      </div>
+
+      <div id="sidebar-filters" class="space-y-8"></div>
     </aside>
 
+    <!-- ─── MAIN GRID ─── -->
     <main class="flex-1 overflow-y-auto p-10 bg-obsidian-900">
       <div id="scenario-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-8"></div>
     </main>
   </div>
 
-  <div id="edit-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[60] hidden flex items-center justify-center p-6">
+  <!-- ═══ EDIT MODAL ═══ -->
+  <div id="edit-modal" class="fixed inset-0 bg-black/95 backdrop-blur-md z-[60] items-center justify-center p-6">
     <div class="bg-obsidian-800 border border-white/10 rounded-3xl w-full max-w-6xl h-[90vh] overflow-hidden flex shadow-2xl">
-      <div class="w-80 bg-obsidian-900 p-8 border-r border-white/5 flex flex-col items-center">
-        <img id="edit-thumb" class="w-full aspect-[3/4] object-cover rounded-xl shadow-2xl mb-6 bg-obsidian-700" src="" />
-        <button id="ai-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 py-4 rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-900/20 mb-4">✨ AI 서적 큐레이팅</button>
-        <div class="text-[10px] text-gray-500 text-center leading-relaxed">설정된 프롬프트에 따라 마크다운 형식을 포함한 전문 분석을 수행합니다.</div>
+
+      <!-- Left panel -->
+      <div class="w-80 bg-obsidian-900 p-8 border-r border-white/5 flex flex-col items-center flex-shrink-0">
+        <img id="edit-thumb" class="w-full aspect-[3/4] object-cover rounded-xl shadow-2xl mb-6 bg-obsidian-700" src="" alt="" />
+        <button id="ai-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 py-4 rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-900/20 mb-3">✨ AI 서적 큐레이팅</button>
+        <button id="open-pdf-btn" class="w-full bg-obsidian-700 hover:bg-obsidian-600 border border-white/10 py-3.5 rounded-xl text-sm font-bold transition-all mb-3">📄 PDF 읽기</button>
+        <button id="delete-scenario-btn" class="w-full py-3 rounded-xl text-sm font-semibold transition-all border border-red-500/25 text-red-400 hover:bg-red-500/10">🗑️ 시나리오 삭제</button>
+        <div class="text-[10px] text-gray-600 text-center leading-relaxed mt-4">AI 큐레이팅은 마크다운 형식의 전문 분석을 수행합니다</div>
       </div>
-      
+
+      <!-- Right panel -->
       <div class="flex-1 p-10 overflow-y-auto">
         <div class="flex justify-between items-start mb-6">
           <div class="flex-1 mr-4">
             <label class="text-[10px] uppercase text-purple-400 font-bold mb-1 block">Scenario Title</label>
             <input type="text" id="edit-title" class="w-full bg-transparent text-3xl font-bold font-display tracking-tight border-b border-transparent focus:border-purple-500 outline-none pb-1" />
           </div>
-          <button onclick="closeEdit()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
+          <button onclick="closeEdit()" class="text-gray-500 hover:text-white text-2xl leading-none mt-1">&times;</button>
         </div>
-        
+
         <div class="grid grid-cols-2 gap-6 mb-6">
           <div class="space-y-4">
-            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Rule System</label><input type="text" id="edit-rule" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none" /></div>
-            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Author</label><input type="text" id="edit-author" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none" /></div>
+            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Rule System</label><input type="text" id="edit-rule" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-purple-500 transition-colors" /></div>
+            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Author</label><input type="text" id="edit-author" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-purple-500 transition-colors" /></div>
           </div>
           <div class="space-y-4">
-            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Players</label><input type="text" id="edit-players" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none" /></div>
-            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Tags (쉼표 구분)</label><input type="text" id="edit-tags" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none" /></div>
+            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Players</label><input type="text" id="edit-players" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-purple-500 transition-colors" /></div>
+            <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Tags (쉼표 구분)</label><input type="text" id="edit-tags" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-purple-500 transition-colors" /></div>
           </div>
         </div>
 
@@ -116,42 +156,186 @@
             <label class="text-[10px] uppercase text-purple-400 font-bold block">Scenario Curation & Summary</label>
             <button onclick="toggleSummaryMode()" id="toggle-summary-btn" class="text-[10px] text-gray-500 hover:text-white underline">편집 모드 전환</button>
           </div>
-          <div id="summary-viewer" class="markdown-body min-h-[300px] bg-white/5 border border-white/5 rounded-2xl p-6 overflow-y-auto"></div>
+          <div id="summary-viewer" class="markdown-body min-h-[300px] bg-white/5 border border-white/5 rounded-2xl p-6 overflow-y-auto max-h-[400px]"></div>
           <textarea id="edit-summary" class="hidden w-full h-[400px] bg-obsidian-900 border border-purple-500/30 rounded-2xl px-5 py-4 outline-none resize-none leading-relaxed text-gray-300 font-mono text-sm"></textarea>
         </div>
-        
+
         <div class="flex gap-4">
           <button id="save-edit-btn" class="flex-1 bg-white text-black py-4 rounded-xl font-bold hover:bg-gray-200 transition-all">변경사항 저장</button>
-          <button id="open-pdf-btn" class="flex-1 bg-obsidian-700 py-4 rounded-xl font-bold hover:bg-obsidian-600 transition-all border border-white/10">PDF 읽기</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="settings-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[70] hidden flex items-center justify-center p-6">
-    <div class="bg-obsidian-800 border border-white/10 rounded-3xl w-full max-w-2xl p-10 shadow-2xl">
-      <div class="flex justify-between items-center mb-8"><h2 class="text-2xl font-bold font-display text-white">AI Configuration</h2><button onclick="closeSettings()" class="text-gray-500 hover:text-white">&times;</button></div>
-      <div class="space-y-6">
-        <div class="grid grid-cols-2 gap-4">
-          <div><label class="block text-xs text-gray-500 mb-2 font-bold">Provider</label><select id="api-provider" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none text-white"><option value="gemini">Google Gemini</option><option value="openai">OpenAI ChatGPT</option></select></div>
-          <div><label class="block text-xs text-gray-500 mb-2 font-bold">Model Name</label><input type="text" id="api-model" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none text-white" placeholder="gemini-1.5-pro" /></div>
+  <!-- ═══ SETTINGS MODAL ═══ -->
+  <div id="settings-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[70] items-center justify-center p-6">
+    <div class="bg-obsidian-800 border border-white/10 rounded-3xl w-full max-w-2xl shadow-2xl max-h-[90vh] flex flex-col">
+
+      <!-- Header -->
+      <div class="flex justify-between items-center px-10 py-7 border-b border-white/5 flex-shrink-0">
+        <h2 class="text-xl font-bold font-display text-white">⚙️ 설정</h2>
+        <button onclick="closeSettings()" class="text-gray-500 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+
+      <!-- Scrollable body -->
+      <div class="overflow-y-auto flex-1 px-10 py-8 space-y-8">
+
+        <!-- ── AI Configuration ── -->
+        <div>
+          <p class="section-title">🤖 AI Configuration</p>
+          <div class="space-y-4">
+
+            <!-- Provider -->
+            <div>
+              <label class="modal-label">Provider</label>
+              <select id="api-provider" class="modal-input" onchange="onProviderChange()">
+                <option value="google">Google Gemini</option>
+                <option value="openai">OpenAI</option>
+                <option value="claude">Anthropic Claude</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="custom">커스텀 (Custom)</option>
+              </select>
+            </div>
+
+            <!-- Custom Endpoint (custom only) -->
+            <div id="custom-endpoint-row" class="hidden">
+              <label class="modal-label">API Endpoint URL</label>
+              <input type="text" id="api-endpoint" class="modal-input font-mono text-sm" placeholder="https://api.example.com/v1/chat/completions" />
+              <p class="text-[11px] text-gray-600 mt-1.5">OpenAI 호환 엔드포인트를 입력하세요</p>
+            </div>
+
+            <!-- Model Select (known providers) -->
+            <div id="model-select-row">
+              <label class="modal-label">Model</label>
+              <select id="api-model-select" class="modal-input" onchange="onModelSelectChange()">
+              </select>
+            </div>
+
+            <!-- Custom Model Input -->
+            <div id="custom-model-row" class="hidden">
+              <label class="modal-label">모델명 직접 입력</label>
+              <input type="text" id="api-model-custom" class="modal-input font-mono text-sm" placeholder="모델명을 입력하세요" />
+            </div>
+
+            <!-- API Key + Test -->
+            <div>
+              <label class="modal-label">API Key</label>
+              <div class="flex gap-3">
+                <div class="relative flex-1">
+                  <input type="password" id="api-key-input" class="modal-input pr-10" placeholder="sk-..." />
+                  <button onclick="toggleKeyVis()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+                    <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  </button>
+                </div>
+                <button onclick="testConnection()" class="test-btn flex-shrink-0">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                  연결 테스트
+                </button>
+              </div>
+              <p class="text-[11px] text-gray-600 mt-1.5">키는 브라우저 localStorage에만 저장됩니다</p>
+            </div>
+          </div>
         </div>
-        <div><label class="block text-xs text-gray-500 mb-2 font-bold">API Key</label><input type="password" id="api-key-input" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none text-white" /></div>
-        <div><label class="block text-xs text-gray-500 mb-2 font-bold">System Prompt (에디터 역할 수행)</label><textarea id="api-prompt" rows="8" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none resize-none text-sm text-gray-300 font-mono leading-snug"></textarea></div>
-        <div class="flex items-end"><button id="save-settings-btn" class="w-full bg-purple-600 py-4 rounded-xl font-bold text-white">마법 설정 저장</button></div>
+
+        <!-- ── System Prompt ── -->
+        <div>
+          <p class="section-title">📝 System Prompt</p>
+          <textarea id="api-prompt" rows="7" class="modal-input resize-none font-mono text-sm leading-relaxed" placeholder="AI 에디터의 역할과 출력 형식을 정의하세요. 마크다운 형식을 권장합니다."></textarea>
+        </div>
+
+        <!-- ── Data Management ── -->
+        <div>
+          <p class="section-title">💾 데이터 관리</p>
+          <div class="space-y-3">
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-white/3 border border-white/5">
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-gray-200 mb-0.5">라이브러리 내보내기</p>
+                <p class="text-xs text-gray-500">모든 시나리오(PDF 포함)를 <code class="text-purple-400">.arcane</code> 파일로 저장합니다. 다른 기기에서 불러올 수 있습니다.</p>
+              </div>
+              <button onclick="exportLibrary()" class="flex-shrink-0 text-xs px-4 py-2.5 rounded-lg font-semibold text-white transition-all" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">
+                내보내기
+              </button>
+            </div>
+            <div class="flex items-start gap-4 p-4 rounded-xl bg-white/3 border border-white/5">
+              <div class="flex-1">
+                <p class="text-sm font-semibold text-gray-200 mb-0.5">라이브러리 불러오기</p>
+                <p class="text-xs text-gray-500"><code class="text-purple-400">.arcane</code> 파일을 선택하면 기존 데이터와 병합됩니다. 같은 ID는 덮어씁니다.</p>
+              </div>
+              <label class="flex-shrink-0 text-xs px-4 py-2.5 rounded-lg font-semibold text-gray-300 border border-white/10 hover:border-white/25 transition-all cursor-pointer">
+                불러오기
+                <input type="file" id="import-input-settings" class="hidden" accept=".arcane,.json" onchange="importLibrary(this.files[0])" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Danger Zone ── -->
+        <div>
+          <p class="section-title" style="color:#f87171; border-color:rgba(239,68,68,0.2);">⚠️ 위험 구역</p>
+          <button onclick="clearAllData()" class="danger-btn">
+            🗑️ 전체 라이브러리 초기화 (복구 불가)
+          </button>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-10 py-6 border-t border-white/5 flex-shrink-0">
+        <button id="save-settings-btn" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-bold text-white transition-all">설정 저장</button>
       </div>
     </div>
   </div>
 
-  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl bg-white text-black font-bold shadow-2xl z-[100] transition-all opacity-0 pointer-events-none scale-90"></div>
+  <!-- ═══ TOAST ═══ -->
+  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl bg-white text-black font-bold shadow-2xl z-[100] transition-all opacity-0 pointer-events-none scale-90 text-sm"></div>
 
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    let db, scenarios = [], currentEditId = null;
-    let isEditMode = false;
+    // ───────────────────────────────────────────────
+    // MODEL REGISTRY
+    // ───────────────────────────────────────────────
+    const AI_MODELS = {
+      google: [
+        'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite',
+        'gemini-3-pro-preview', 'gemini-3-flash-preview',
+        'gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview',
+      ],
+      openai: [
+        'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano',
+        'gpt-5', 'gpt-5-mini', 'gpt-5-nano',
+        'gpt-5.1', 'gpt-5.2',
+        'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.4-nano',
+        'gpt-5.5',
+        'o1', 'o3', 'o3-mini', 'o4-mini',
+      ],
+      claude: [
+        'claude-sonnet-4-6', 'claude-sonnet-4-6-r',
+        'claude-opus-4-6', 'claude-opus-4-6-r',
+        'claude-opus-4-7', 'claude-opus-4-7-r',
+        'claude-opus-4-5-20251101', 'claude-opus-4-1-20250805',
+        'claude-haiku-4-5-20251001',
+      ],
+      deepseek: [
+        'deepseek-v4', 'deepseek-v4-flash', 'deepseek-v4-pro', 'deepseek-v3.2',
+      ],
+    };
+
+    const PROVIDER_DEFAULTS = {
+      google: 'gemini-2.5-flash',
+      openai: 'gpt-4.1-mini',
+      claude: 'claude-sonnet-4-6',
+      deepseek: 'deepseek-v4-flash',
+    };
+
+    // ───────────────────────────────────────────────
+    // STATE
+    // ───────────────────────────────────────────────
+    let db, scenarios = [], currentEditId = null, isEditMode = false;
     let selectedFilter = { type: 'all', value: null };
 
+    // ───────────────────────────────────────────────
+    // INDEXEDDB
+    // ───────────────────────────────────────────────
     async function openDB() {
       return new Promise(r => {
         const req = indexedDB.open('arcane-shelf-v3', 1);
@@ -159,23 +343,33 @@
         req.onsuccess = e => r(e.target.result);
       });
     }
-
     async function dbSave(item) {
       const tx = db.transaction('scenarios', 'readwrite');
       tx.objectStore('scenarios').put(item);
       return new Promise(r => tx.oncomplete = r);
     }
-
     async function dbGetAll() {
       const tx = db.transaction('scenarios', 'readonly');
       const req = tx.objectStore('scenarios').getAll();
       return new Promise(r => req.onsuccess = () => r(req.result));
     }
+    async function dbDelete(id) {
+      const tx = db.transaction('scenarios', 'readwrite');
+      tx.objectStore('scenarios').delete(id);
+      return new Promise(r => tx.oncomplete = r);
+    }
+    async function dbClear() {
+      const tx = db.transaction('scenarios', 'readwrite');
+      tx.objectStore('scenarios').clear();
+      return new Promise(r => tx.oncomplete = r);
+    }
 
+    // ───────────────────────────────────────────────
+    // FILE IMPORT (PDF)
+    // ───────────────────────────────────────────────
     async function handleFiles(files) {
       if (!files || files.length === 0) return;
       showToast(`${files.length}개의 문서를 분석 중...`);
-
       for (const file of Array.from(files)) {
         try {
           const arrayBuffer = await file.arrayBuffer();
@@ -183,25 +377,23 @@
           const page = await pdf.getPage(1);
           const viewport = page.getViewport({ scale: 0.8 });
           const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.height = viewport.height; canvas.width = viewport.width;
-          await page.render({ canvasContext: ctx, viewport }).promise;
-
+          canvas.width = viewport.width; canvas.height = viewport.height;
+          await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
           const base64PDF = await new Promise(r => {
             const reader = new FileReader();
             reader.onload = () => r(reader.result);
             reader.readAsDataURL(file);
           });
-
           const scenario = {
             id: crypto.randomUUID(),
-            title: file.name.replace('.pdf', ''),
-            rule: 'Unknown', author: 'Unknown', players: '-', tags: [], summary: 'AI 요약을 실행하여 큐레이팅 결과를 확인하세요.',
+            title: file.name.replace(/\.pdf$/i, ''),
+            rule: '', author: '', players: '', tags: [],
+            summary: 'AI 요약을 실행하여 큐레이팅 결과를 확인하세요.',
             thumbnail: canvas.toDataURL('image/jpeg', 0.7),
             pdfData: base64PDF,
+            pageCount: pdf.numPages,
             addedAt: Date.now()
           };
-
           await dbSave(scenario);
           scenarios.unshift(scenario);
           renderGrid();
@@ -211,59 +403,86 @@
         }
       }
       showToast('입고 완료!', 'success');
-      document.getElementById('file-input').value = "";
+      document.getElementById('file-input').value = '';
     }
 
+    // ───────────────────────────────────────────────
+    // RENDER GRID
+    // ───────────────────────────────────────────────
     function renderGrid() {
       const grid = document.getElementById('scenario-grid');
       const term = document.getElementById('search-input').value.toLowerCase();
-      
-      let filtered = scenarios.filter(s => s.title.toLowerCase().includes(term));
-      
-      if (selectedFilter.type === 'rule') {
-          filtered = filtered.filter(s => s.rule === selectedFilter.value);
-      } else if (selectedFilter.type === 'tag') {
-          filtered = filtered.filter(s => s.tags.includes(selectedFilter.value));
+      let filtered = scenarios.filter(s =>
+        s.title.toLowerCase().includes(term) ||
+        (s.author || '').toLowerCase().includes(term) ||
+        (s.rule || '').toLowerCase().includes(term)
+      );
+      if (selectedFilter.type === 'rule')   filtered = filtered.filter(s => s.rule === selectedFilter.value);
+      else if (selectedFilter.type === 'author') filtered = filtered.filter(s => s.author === selectedFilter.value);
+      else if (selectedFilter.type === 'tag')    filtered = filtered.filter(s => s.tags.includes(selectedFilter.value));
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-24 text-gray-600 text-sm">
+          ${scenarios.length === 0 ? '시나리오를 입고하세요.' : '검색 결과가 없습니다.'}
+        </div>`;
+        return;
       }
 
       grid.innerHTML = filtered.map(s => `
         <div class="shelf-card group cursor-pointer" onclick="openEdit('${s.id}')">
           <div class="relative aspect-[3/4] overflow-hidden rounded-2xl bg-obsidian-700 shadow-xl">
             <img src="${s.thumbnail}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-5 opacity-100 group-hover:opacity-100 transition-opacity">
-               <p class="text-[9px] text-purple-400 font-bold uppercase tracking-wider mb-1">${s.rule}</p>
-               <h3 class="text-white font-bold text-sm leading-tight line-clamp-2">${s.title}</h3>
+            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-transparent flex flex-col justify-end p-5">
+              <p class="text-[9px] text-purple-400 font-bold uppercase tracking-wider mb-1">${esc(s.rule) || '—'}</p>
+              <h3 class="text-white font-bold text-sm leading-tight line-clamp-2">${esc(s.title)}</h3>
+              ${s.author ? `<p class="text-[10px] text-gray-500 mt-0.5">${esc(s.author)}</p>` : ''}
             </div>
           </div>
         </div>
       `).join('');
     }
 
+    // ───────────────────────────────────────────────
+    // RENDER SIDEBAR  ← [1] Author filter 추가
+    // ───────────────────────────────────────────────
     function renderSidebar() {
       const container = document.getElementById('sidebar-filters');
-      const rules = [...new Set(scenarios.map(s => s.rule))].filter(r => r && r !== 'Unknown');
-      const tags = [...new Set(scenarios.flatMap(s => s.tags))].filter(t => t);
+      const rules   = [...new Set(scenarios.map(s => s.rule).filter(r => r && r.trim()))].sort();
+      const authors = [...new Set(scenarios.map(s => s.author).filter(a => a && a.trim()))].sort();
+      const tags    = [...new Set(scenarios.flatMap(s => s.tags).filter(t => t))].sort();
+
+      const makeBtn = (type, value, label) => {
+        const active = selectedFilter.type === type && selectedFilter.value === value;
+        return `<button onclick="setFilter('${type}','${esc(value)}')" class="sidebar-btn ${active ? 'active' : ''}">${label}</button>`;
+      };
+      const makeTagBtn = (t) => {
+        const active = selectedFilter.type === 'tag' && selectedFilter.value === t;
+        return `<button onclick="setFilter('tag','${esc(t)}')" class="tag-btn ${active ? 'active' : ''}">#${esc(t)}</button>`;
+      };
 
       let html = `
         <div>
-          <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4">View All</h4>
-          <button onclick="setFilter('all')" class="w-full text-left text-sm py-2 px-3 rounded-lg hover:bg-white/5 transition-all ${selectedFilter.type === 'all' ? 'bg-purple-600/20 text-purple-400' : 'text-gray-400'}">전체 보기 (${scenarios.length})</button>
-        </div>
-      `;
+          <p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">전체</p>
+          <button onclick="setFilter('all')" class="sidebar-btn ${selectedFilter.type === 'all' ? 'active' : ''}">
+            전체 보기 <span class="text-gray-600 text-xs">(${scenarios.length})</span>
+          </button>
+        </div>`;
 
-      if (rules.length > 0) {
-        html += `<div><h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4 mt-8">By System</h4><div class="flex flex-col gap-1">`;
-        rules.forEach(r => {
-          html += `<button onclick="setFilter('rule', '${r}')" class="text-left text-sm py-2 px-3 rounded-lg hover:bg-white/5 transition-all ${selectedFilter.value === r ? 'bg-purple-600/20 text-purple-400' : 'text-gray-400'}">${r}</button>`;
-        });
+      if (rules.length) {
+        html += `<div><p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">By System</p><div class="flex flex-col gap-0.5">`;
+        rules.forEach(r => { html += makeBtn('rule', r, r); });
         html += `</div></div>`;
       }
 
-      if (tags.length > 0) {
-        html += `<div><h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4 mt-8">Popular Tags</h4><div class="flex flex-wrap gap-2">`;
-        tags.slice(0, 15).forEach(t => {
-          html += `<button onclick="setFilter('tag', '${t}')" class="text-[10px] px-2 py-1 rounded-md border border-white/10 hover:border-purple-500 transition-all ${selectedFilter.value === t ? 'bg-purple-500 text-white border-purple-500' : 'text-gray-500'}">#${t}</button>`;
-        });
+      if (authors.length) {
+        html += `<div><p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">By Author</p><div class="flex flex-col gap-0.5">`;
+        authors.forEach(a => { html += makeBtn('author', a, a); });
+        html += `</div></div>`;
+      }
+
+      if (tags.length) {
+        html += `<div><p class="text-[10px] uppercase tracking-widest text-gray-600 font-bold mb-3">Tags</p><div class="flex flex-wrap gap-2">`;
+        tags.slice(0, 20).forEach(t => { html += makeTagBtn(t); });
         html += `</div></div>`;
       }
 
@@ -272,164 +491,411 @@
 
     function setFilter(type, value = null) {
       selectedFilter = { type, value };
-      renderGrid();
-      renderSidebar();
+      renderGrid(); renderSidebar();
     }
 
+    // ───────────────────────────────────────────────
+    // EDIT MODAL
+    // ───────────────────────────────────────────────
     function openEdit(id) {
       currentEditId = id;
-      const s = scenarios.find(item => item.id === id);
-      
+      const s = scenarios.find(i => i.id === id);
       document.getElementById('edit-title').value = s.title;
       document.getElementById('edit-thumb').src = s.thumbnail;
-      document.getElementById('edit-rule').value = s.rule;
-      document.getElementById('edit-author').value = s.author;
-      document.getElementById('edit-players').value = s.players;
-      document.getElementById('edit-tags').value = s.tags.join(', ');
-      document.getElementById('edit-summary').value = s.summary;
-      
-      // 마크다운 렌더링 적용
-      renderMarkdown(s.summary);
-      
-      // 모드 초기화
+      document.getElementById('edit-rule').value = s.rule || '';
+      document.getElementById('edit-author').value = s.author || '';
+      document.getElementById('edit-players').value = s.players || '';
+      document.getElementById('edit-tags').value = (s.tags || []).join(', ');
+      document.getElementById('edit-summary').value = s.summary || '';
+      renderMarkdown(s.summary || '');
       isEditMode = false;
       document.getElementById('summary-viewer').classList.remove('hidden');
       document.getElementById('edit-summary').classList.add('hidden');
-      document.getElementById('toggle-summary-btn').innerText = "편집 모드 전환";
-
-      document.getElementById('open-pdf-btn').onclick = () => {
-          const blob = dataURLtoBlob(s.pdfData);
-          window.open(URL.createObjectURL(blob), '_blank');
-      };
-      document.getElementById('edit-modal').classList.remove('hidden');
+      document.getElementById('toggle-summary-btn').innerText = '편집 모드 전환';
+      document.getElementById('edit-modal').classList.add('show');
     }
 
-    function renderMarkdown(text) {
-      const viewer = document.getElementById('summary-viewer');
-      viewer.innerHTML = marked.parse(text || "");
-    }
+    function closeEdit() { document.getElementById('edit-modal').classList.remove('show'); }
 
     function toggleSummaryMode() {
       isEditMode = !isEditMode;
       const viewer = document.getElementById('summary-viewer');
       const editor = document.getElementById('edit-summary');
       const btn = document.getElementById('toggle-summary-btn');
-
       if (isEditMode) {
-        editor.classList.remove('hidden');
-        viewer.classList.add('hidden');
-        btn.innerText = "미리보기 모드 전환";
+        editor.classList.remove('hidden'); viewer.classList.add('hidden');
+        btn.innerText = '미리보기 모드 전환';
       } else {
-        editor.classList.add('hidden');
-        viewer.classList.remove('hidden');
-        renderMarkdown(editor.value);
-        btn.innerText = "편집 모드 전환";
+        editor.classList.add('hidden'); viewer.classList.remove('hidden');
+        renderMarkdown(editor.value); btn.innerText = '편집 모드 전환';
       }
     }
 
-    async function generateAISummary(id) {
-      const config = {
-        key: localStorage.getItem('arcane_key'),
-        provider: localStorage.getItem('arcane_provider') || 'gemini',
-        model: localStorage.getItem('arcane_model') || 'gemini-1.5-pro',
-        prompt: localStorage.getItem('arcane_prompt') || ''
-      };
-
-      if (!config.key) { showToast('API 키를 입력해주세요.', 'error'); return openSettings(); }
-      const sc = scenarios.find(s => s.id === id);
-      showToast('전문 텍스트를 추출하고 있습니다...');
-
-      try {
-        const blob = dataURLtoBlob(sc.pdfData);
-        const arrayBuffer = await blob.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-        let fullText = "";
-        const maxPages = Math.min(pdf.numPages, 20);
-        for (let i = 1; i <= maxPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          fullText += textContent.items.map(it => it.str).join(' ') + "\n";
-        }
-
-        showToast('AI 에디터가 서적을 분석 중입니다...');
-        const prompt = `${config.prompt}\n\n시나리오 원본 데이터:\n${fullText.slice(0, 20000)}`;
-
-        let result = "";
-        if (config.provider === 'gemini') {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.key}`, {
-            method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-          });
-          const d = await res.json();
-          result = d.candidates[0].content.parts[0].text;
-        } else {
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST', headers: { 'Authorization': `Bearer ${config.key}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: config.model, messages: [{ role: 'user', content: prompt }] })
-          });
-          const d = await res.json();
-          result = d.choices[0].message.content;
-        }
-        
-        document.getElementById('edit-summary').value = result;
-        renderMarkdown(result);
-        showToast('큐레이팅 완료!', 'success');
-      } catch (e) { showToast('분석 실패', 'error'); }
+    function renderMarkdown(text) {
+      document.getElementById('summary-viewer').innerHTML = marked.parse(text || '');
     }
 
     async function saveEdit() {
       const idx = scenarios.findIndex(s => s.id === currentEditId);
-      scenarios[idx].title = document.getElementById('edit-title').value; // 제목 수정 반영
-      scenarios[idx].rule = document.getElementById('edit-rule').value;
-      scenarios[idx].author = document.getElementById('edit-author').value;
-      scenarios[idx].players = document.getElementById('edit-players').value;
-      scenarios[idx].tags = document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(t => t);
-      scenarios[idx].summary = document.getElementById('edit-summary').value;
-      
-      await dbSave(scenarios[idx]);
-      renderGrid(); 
-      renderSidebar();
+      if (idx < 0) return;
+      const sc = scenarios[idx];
+      sc.title   = document.getElementById('edit-title').value;
+      sc.rule    = document.getElementById('edit-rule').value;
+      sc.author  = document.getElementById('edit-author').value;
+      sc.players = document.getElementById('edit-players').value;
+      sc.tags    = document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(t => t);
+      sc.summary = document.getElementById('edit-summary').value;
+      await dbSave(sc);
+      renderGrid(); renderSidebar(); closeEdit();
+      showToast('라이브러리가 갱신되었습니다.', 'success');
+    }
+
+    // ───────────────────────────────────────────────
+    // DELETE SCENARIO  ← [2] 삭제 기능
+    // ───────────────────────────────────────────────
+    async function deleteCurrentScenario() {
+      if (!currentEditId) return;
+      const sc = scenarios.find(s => s.id === currentEditId);
+      const confirmed = confirm(`"${sc?.title || '이 시나리오'}"를 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`);
+      if (!confirmed) return;
+      await dbDelete(currentEditId);
+      scenarios = scenarios.filter(s => s.id !== currentEditId);
       closeEdit();
-      showToast('라이브러리가 갱신되었습니다.');
+      renderGrid(); renderSidebar();
+      showToast('시나리오가 삭제되었습니다.', 'success');
+    }
+
+    // ───────────────────────────────────────────────
+    // PDF OPEN
+    // ───────────────────────────────────────────────
+    function openPDF(id) {
+      const sc = scenarios.find(s => s.id === (id || currentEditId));
+      if (!sc?.pdfData) { showToast('PDF 데이터가 없습니다.', 'error'); return; }
+      try {
+        const blob = dataURLtoBlob(sc.pdfData);
+        const url = URL.createObjectURL(blob);
+        const win = window.open(url, '_blank');
+        if (!win) {
+          // 팝업 차단 시 링크 클릭 방식으로 fallback
+          const a = document.createElement('a');
+          a.href = url; a.target = '_blank'; a.rel = 'noopener';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        }
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+      } catch(e) {
+        showToast('PDF를 열 수 없습니다: ' + e.message, 'error');
+      }
     }
 
     function dataURLtoBlob(dataurl) {
-        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-        while(n--) u8arr[n] = bstr.charCodeAt(n);
-        return new Blob([u8arr], {type:mime});
+      const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1];
+      const bstr = atob(arr[1]); let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while(n--) u8arr[n] = bstr.charCodeAt(n);
+      return new Blob([u8arr], { type: mime });
     }
 
-    function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+    // ───────────────────────────────────────────────
+    // EXPORT / IMPORT  ← [3] 데이터 내보내기/불러오기
+    // ───────────────────────────────────────────────
+    function exportLibrary() {
+      if (scenarios.length === 0) { showToast('내보낼 시나리오가 없습니다.', 'error'); return; }
+      const data = { version: '3.4', exportedAt: new Date().toISOString(), count: scenarios.length, scenarios };
+      const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `arcane-shelf-${new Date().toISOString().slice(0,10)}.arcane`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(`${scenarios.length}개 시나리오를 내보냈습니다.`, 'success');
+    }
+
+    async function importLibrary(file) {
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        if (!Array.isArray(data.scenarios)) throw new Error('올바른 .arcane 파일이 아닙니다.');
+        const confirmed = confirm(
+          `${data.scenarios.length}개의 시나리오를 불러옵니다.\n` +
+          `내보낸 날짜: ${data.exportedAt ? new Date(data.exportedAt).toLocaleString('ko-KR') : '알 수 없음'}\n\n` +
+          `기존 라이브러리와 병합됩니다 (같은 ID는 덮어씁니다). 계속하시겠습니까?`
+        );
+        if (!confirmed) return;
+        let count = 0;
+        for (const sc of data.scenarios) {
+          await dbSave(sc);
+          const idx = scenarios.findIndex(s => s.id === sc.id);
+          if (idx >= 0) scenarios[idx] = sc; else { scenarios.unshift(sc); count++; }
+        }
+        scenarios.sort((a,b) => b.addedAt - a.addedAt);
+        renderGrid(); renderSidebar();
+        showToast(`${data.scenarios.length}개 불러오기 완료! (신규 ${count}개)`, 'success');
+      } catch(e) {
+        showToast(`불러오기 실패: ${e.message}`, 'error');
+      }
+      // Reset input so same file can be re-selected
+      document.getElementById('import-input').value = '';
+      document.getElementById('import-input-settings').value = '';
+    }
+
+    async function clearAllData() {
+      const confirmed = confirm('모든 시나리오를 삭제합니다. 이 작업은 복구할 수 없습니다.\n\n정말로 초기화하시겠습니까?');
+      if (!confirmed) return;
+      await dbClear();
+      scenarios = [];
+      closeSettings();
+      renderGrid(); renderSidebar();
+      showToast('라이브러리가 초기화되었습니다.', 'success');
+    }
+
+    // ───────────────────────────────────────────────
+    // SETTINGS MODAL  ← [4] 모델 선택 / 커스텀 프로바이더
+    // ───────────────────────────────────────────────
+    function onProviderChange() {
+      const provider = document.getElementById('api-provider').value;
+      const endpointRow   = document.getElementById('custom-endpoint-row');
+      const modelSelRow   = document.getElementById('model-select-row');
+      const customMdlRow  = document.getElementById('custom-model-row');
+      const modelSelect   = document.getElementById('api-model-select');
+
+      if (provider === 'custom') {
+        endpointRow.classList.remove('hidden');
+        modelSelRow.classList.add('hidden');
+        customMdlRow.classList.remove('hidden');
+      } else {
+        endpointRow.classList.add('hidden');
+        modelSelRow.classList.remove('hidden');
+        // Populate model list
+        const models = AI_MODELS[provider] || [];
+        modelSelect.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('') +
+          '<option value="__custom__">✏️ 직접 입력...</option>';
+        onModelSelectChange();
+      }
+    }
+
+    function onModelSelectChange() {
+      const val = document.getElementById('api-model-select').value;
+      const customRow = document.getElementById('custom-model-row');
+      if (val === '__custom__') {
+        customRow.classList.remove('hidden');
+      } else {
+        customRow.classList.add('hidden');
+      }
+    }
+
+    function getFormProvider() { return document.getElementById('api-provider').value; }
+
+    function getFormModel() {
+      const provider = getFormProvider();
+      if (provider === 'custom') return document.getElementById('api-model-custom').value.trim();
+      const sel = document.getElementById('api-model-select').value;
+      if (sel === '__custom__') return document.getElementById('api-model-custom').value.trim();
+      return sel;
+    }
+
     function openSettings() {
+      // Restore saved values
+      const provider  = localStorage.getItem('arcane_provider') || 'google';
+      const savedModel = localStorage.getItem('arcane_model') || PROVIDER_DEFAULTS[provider] || '';
+      const savedEndpoint = localStorage.getItem('arcane_endpoint') || '';
+
       document.getElementById('api-key-input').value = localStorage.getItem('arcane_key') || '';
-      document.getElementById('api-provider').value = localStorage.getItem('arcane_provider') || 'gemini';
-      document.getElementById('api-model').value = localStorage.getItem('arcane_model') || 'gemini-1.5-pro';
-      document.getElementById('api-prompt').value = localStorage.getItem('arcane_prompt') || '';
-      document.getElementById('settings-modal').classList.remove('hidden');
-    }
-    function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
-    function saveSettings() {
-      localStorage.setItem('arcane_key', document.getElementById('api-key-input').value);
-      localStorage.setItem('arcane_provider', document.getElementById('api-provider').value);
-      localStorage.setItem('arcane_model', document.getElementById('api-model').value);
-      localStorage.setItem('arcane_prompt', document.getElementById('api-prompt').value);
-      closeSettings(); showToast('설정이 저장되었습니다.', 'success');
+      document.getElementById('api-prompt').value    = localStorage.getItem('arcane_prompt') || '';
+      document.getElementById('api-endpoint').value  = savedEndpoint;
+      document.getElementById('api-provider').value  = provider;
+      onProviderChange(); // populate model list
+
+      // Restore model selection
+      if (provider !== 'custom') {
+        const models = AI_MODELS[provider] || [];
+        const select = document.getElementById('api-model-select');
+        if (models.includes(savedModel)) {
+          select.value = savedModel;
+          document.getElementById('custom-model-row').classList.add('hidden');
+        } else {
+          select.value = '__custom__';
+          document.getElementById('api-model-custom').value = savedModel;
+          document.getElementById('custom-model-row').classList.remove('hidden');
+        }
+      } else {
+        document.getElementById('api-model-custom').value = savedModel;
+      }
+
+      document.getElementById('settings-modal').classList.add('show');
     }
 
+    function closeSettings() { document.getElementById('settings-modal').classList.remove('show'); }
+
+    function saveSettings() {
+      localStorage.setItem('arcane_provider', getFormProvider());
+      localStorage.setItem('arcane_model',    getFormModel());
+      localStorage.setItem('arcane_key',      document.getElementById('api-key-input').value.trim());
+      localStorage.setItem('arcane_prompt',   document.getElementById('api-prompt').value);
+      localStorage.setItem('arcane_endpoint', document.getElementById('api-endpoint').value.trim());
+      closeSettings();
+      showToast('설정이 저장되었습니다.', 'success');
+    }
+
+    function toggleKeyVis() {
+      const inp = document.getElementById('api-key-input');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    // ───────────────────────────────────────────────
+    // AI CALL
+    // ───────────────────────────────────────────────
+    async function callAI(provider, key, model, endpoint, prompt) {
+      let res, data;
+      if (provider === 'google') {
+        res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+        return data.candidates[0].content.parts[0].text;
+
+      } else if (provider === 'openai') {
+        res = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] })
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+        return data.choices[0].message.content;
+
+      } else if (provider === 'claude') {
+        res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': key,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({ model, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] })
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+        return data.content[0].text;
+
+      } else if (provider === 'deepseek') {
+        res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] })
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+        return data.choices[0].message.content;
+
+      } else {
+        // Custom provider — OpenAI-compatible
+        if (!endpoint) throw new Error('커스텀 엔드포인트 URL을 입력해주세요.');
+        res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }] })
+        });
+        data = await res.json();
+        if (!res.ok) throw new Error(data.error?.message || `HTTP ${res.status}`);
+        return data.choices[0].message.content;
+      }
+    }
+
+    // Test Connection
+    async function testConnection() {
+      const provider = getFormProvider();
+      const key      = document.getElementById('api-key-input').value.trim();
+      const model    = getFormModel();
+      const endpoint = document.getElementById('api-endpoint').value.trim();
+      if (!key)   { showToast('API 키를 먼저 입력해주세요.', 'error'); return; }
+      if (!model) { showToast('모델을 선택하거나 입력해주세요.', 'error'); return; }
+      showToast('연결 테스트 중...');
+      try {
+        await callAI(provider, key, model, endpoint, '안녕하세요. 한 문장으로만 응답해주세요.');
+        showToast('✓ 연결 성공!', 'success');
+      } catch(e) {
+        showToast(`연결 실패: ${e.message}`, 'error');
+      }
+    }
+
+    // AI Summarize
+    async function generateAISummary(id) {
+      const key      = localStorage.getItem('arcane_key');
+      const provider = localStorage.getItem('arcane_provider') || 'google';
+      const model    = localStorage.getItem('arcane_model') || PROVIDER_DEFAULTS[provider];
+      const endpoint = localStorage.getItem('arcane_endpoint') || '';
+      const sysPrompt = localStorage.getItem('arcane_prompt') || '';
+      if (!key) { showToast('API 키를 입력해주세요.', 'error'); return openSettings(); }
+
+      const sc = scenarios.find(s => s.id === id);
+      showToast('전문 텍스트를 추출하고 있습니다...');
+      try {
+        const blob = dataURLtoBlob(sc.pdfData);
+        const arrayBuffer = await blob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        let fullText = '';
+        const maxPages = Math.min(pdf.numPages, 20);
+        for (let i = 1; i <= maxPages; i++) {
+          const pg = await pdf.getPage(i);
+          const tc = await pg.getTextContent();
+          fullText += tc.items.map(it => it.str).join(' ') + '\n';
+        }
+        showToast('AI 에디터가 서적을 분석 중입니다...');
+        const prompt = `${sysPrompt}\n\n시나리오 원본 데이터:\n${fullText.slice(0, 20000)}`;
+        const result = await callAI(provider, key, model, endpoint, prompt);
+        document.getElementById('edit-summary').value = result;
+        renderMarkdown(result);
+        showToast('큐레이팅 완료!', 'success');
+      } catch(e) {
+        showToast('분석 실패: ' + e.message, 'error');
+      }
+    }
+
+    // ───────────────────────────────────────────────
+    // UTILS
+    // ───────────────────────────────────────────────
+    let toastTimer;
     function showToast(msg, type = 'info') {
+      clearTimeout(toastTimer);
       const t = document.getElementById('toast');
       t.innerText = msg;
-      t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl font-bold shadow-2xl z-[100] transition-all opacity-100 scale-100 ${type === 'error' ? 'bg-red-500 text-white' : (type === 'success' ? 'bg-purple-600 text-white' : 'bg-white text-black')}`;
-      setTimeout(() => { t.classList.replace('opacity-100', 'opacity-0'); }, 3000);
+      t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl font-bold shadow-2xl z-[100] transition-all opacity-100 scale-100 text-sm ${
+        type === 'error'   ? 'bg-red-500 text-white' :
+        type === 'success' ? 'bg-purple-600 text-white' :
+                             'bg-white text-black'}`;
+      toastTimer = setTimeout(() => {
+        t.classList.replace('opacity-100', 'opacity-0');
+        t.classList.replace('scale-100', 'scale-90');
+      }, 3500);
     }
 
-    document.getElementById('file-input').onchange = (e) => handleFiles(e.target.files);
-    document.getElementById('search-input').oninput = renderGrid;
-    document.getElementById('settings-btn').onclick = openSettings;
-    document.getElementById('save-settings-btn').onclick = saveSettings;
-    document.getElementById('save-edit-btn').onclick = saveEdit;
-    document.getElementById('ai-btn').onclick = () => generateAISummary(currentEditId);
+    function esc(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
 
+    // ───────────────────────────────────────────────
+    // EVENT LISTENERS
+    // ───────────────────────────────────────────────
+    document.getElementById('file-input').onchange    = e => handleFiles(e.target.files);
+    document.getElementById('import-input').onchange  = e => importLibrary(e.target.files[0]);
+    document.getElementById('search-input').oninput   = renderGrid;
+    document.getElementById('settings-btn').onclick   = openSettings;
+    document.getElementById('save-settings-btn').onclick = saveSettings;
+    document.getElementById('save-edit-btn').onclick  = saveEdit;
+    document.getElementById('ai-btn').onclick         = () => generateAISummary(currentEditId);
+    document.getElementById('open-pdf-btn').onclick   = () => openPDF(currentEditId);
+    document.getElementById('delete-scenario-btn').onclick = deleteCurrentScenario;
+
+    // ───────────────────────────────────────────────
+    // INIT
+    // ───────────────────────────────────────────────
     (async () => {
       db = await openDB();
       scenarios = await dbGetAll();
