@@ -31,6 +31,9 @@
 
   <style>
     body { background-color: #050508; color: #e2e8f0; overflow: hidden; }
+    @media (max-width: 767px) {
+      body { overflow: auto; }
+    }
     .glass-nav { background: rgba(10,10,15,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); }
     .shelf-card { transition: all 0.3s cubic-bezier(0.4,0,0.2,1); border: 1px solid rgba(255,255,255,0.03); }
     .shelf-card:hover { transform: translateY(-8px); border-color: rgba(124,58,237,0.4); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5); }
@@ -61,34 +64,205 @@
     .provider-badge { display:inline-flex; align-items:center; gap:4px; font-size:9px; padding:2px 7px; border-radius:4px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; }
     #settings-modal, #edit-modal { display:none; }
     #settings-modal.show, #edit-modal.show { display:flex; }
+
+    /* ═══ MOBILE OPTIMIZATIONS ═══ */
+
+    /* Mobile nav */
+    @media (max-width: 767px) {
+      nav.glass-nav { padding: 10px 16px; }
+      #search-input { width: 100% !important; }
+      .nav-title-text { display: none; }
+      .nav-version-badge { display: none; }
+    }
+
+    /* Sidebar drawer (mobile) */
+    #sidebar-drawer-overlay {
+      display: none;
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 40;
+    }
+    #sidebar-drawer-overlay.open { display: block; }
+    @media (max-width: 767px) {
+      aside#main-sidebar {
+        position: fixed;
+        left: -110%;
+        top: 0; bottom: 0;
+        z-index: 45;
+        width: 80vw !important;
+        max-width: 320px;
+        transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+        overflow-y: auto;
+        padding: 24px 20px !important;
+      }
+      aside#main-sidebar.open { left: 0; }
+    }
+
+    /* Mobile bottom toolbar */
+    #mobile-bottom-bar {
+      display: none;
+    }
+    @media (max-width: 767px) {
+      #mobile-bottom-bar {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: rgba(10,10,15,0.96);
+        backdrop-filter: blur(16px);
+        border-top: 1px solid rgba(255,255,255,0.07);
+        padding: 10px 8px;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom));
+        z-index: 35;
+        gap: 4px;
+      }
+      #mobile-bottom-bar button {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 4px;
+        border-radius: 10px;
+        font-size: 10px;
+        color: #6b7280;
+        transition: all 0.15s;
+      }
+      #mobile-bottom-bar button.active,
+      #mobile-bottom-bar button:active {
+        color: #a78bfa;
+        background: rgba(124,58,237,0.15);
+      }
+      #mobile-bottom-bar button svg { width: 22px; height: 22px; }
+    }
+
+    /* Layout adjustments */
+    @media (max-width: 767px) {
+      .main-layout { flex-direction: column; height: auto !important; }
+      main#main-content {
+        padding: 16px 12px !important;
+        padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+        overflow-y: auto;
+        flex: 1;
+      }
+      #scenario-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 12px !important;
+      }
+      .shelf-card:hover { transform: none; } /* disable hover on touch */
+    }
+
+    /* Edit modal - mobile full screen */
+    @media (max-width: 767px) {
+      #edit-modal > div {
+        flex-direction: column;
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        max-height: 100%;
+      }
+      #edit-left-panel {
+        width: 100% !important;
+        flex-direction: row !important;
+        align-items: center;
+        padding: 16px !important;
+        gap: 16px;
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        flex-shrink: 0;
+      }
+      #edit-thumb {
+        width: 70px !important;
+        height: auto !important;
+        aspect-ratio: 3/4;
+        border-radius: 10px;
+        flex-shrink: 0;
+      }
+      #edit-action-buttons {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      #edit-action-buttons button,
+      #edit-action-buttons a { 
+        padding: 10px 12px !important;
+        font-size: 12px !important;
+        border-radius: 10px !important;
+      }
+      #edit-ai-caption { display: none; }
+      #edit-right-panel { padding: 16px !important; }
+      #edit-title { font-size: 1.3rem !important; }
+      #edit-fields-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+      #summary-viewer { max-height: 240px !important; }
+      #edit-summary { height: 240px !important; }
+    }
+
+    /* Settings modal - mobile full screen */
+    @media (max-width: 767px) {
+      #settings-modal > div {
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        max-height: 100%;
+      }
+    }
+
+    /* Touch-friendly inputs */
+    @media (max-width: 767px) {
+      input, select, textarea, button { touch-action: manipulation; }
+      .modal-input { font-size: 16px !important; } /* prevent iOS zoom */
+      input[type="text"], input[type="password"] { font-size: 16px !important; }
+    }
+
+    /* Search bar mobile */
+    @media (max-width: 767px) {
+      #search-input { 
+        width: 100%;
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+
+    /* Tablet layout */
+    @media (min-width: 768px) and (max-width: 1023px) {
+      aside#main-sidebar { width: 220px !important; padding: 24px 16px !important; }
+      #scenario-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 16px !important; }
+    }
   </style>
 </head>
 <body class="font-sans antialiased">
 
   <!-- ═══ NAV ═══ -->
-  <nav class="glass-nav sticky top-0 z-50 py-4 px-8 flex justify-between items-center">
+  <nav class="glass-nav sticky top-0 z-50 py-4 px-8 flex justify-between items-center" style="padding: clamp(10px,2vw,16px) clamp(12px,4vw,32px);">
     <div class="flex items-center gap-4">
-      <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20">
-        <span class="font-display font-black text-white text-xl">A</span>
+      <!-- Mobile: hamburger for sidebar -->
+      <button id="mobile-sidebar-btn" class="md:hidden text-gray-400 hover:text-purple-400 transition-colors p-1" title="필터 메뉴">
+        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="w-8 h-8 md:w-10 md:h-10 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20 flex-shrink-0">
+        <span class="font-display font-black text-white text-lg md:text-xl">A</span>
       </div>
-      <h1 class="font-display font-bold text-2xl tracking-tighter text-white">
+      <h1 class="font-display font-bold text-xl md:text-2xl tracking-tighter text-white hidden sm:block">
         ARCANE <span class="text-purple-500">SHELF</span>
-        <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.5</span>
+        <span class="nav-version-badge text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.5</span>
       </h1>
     </div>
-    <div class="flex items-center gap-4">
-      <input type="text" id="search-input" placeholder="아카이브 검색..." class="bg-obsidian-700 border border-white/5 rounded-full py-2 px-6 focus:outline-none focus:border-purple-500 w-72 text-sm transition-all" />
-      <button id="settings-btn" class="text-gray-400 hover:text-purple-400 transition-colors" title="설정">
+    <div class="flex items-center gap-3 flex-1 ml-3 md:ml-0 md:flex-none">
+      <input type="text" id="search-input" placeholder="검색..." class="bg-obsidian-700 border border-white/5 rounded-full py-2 px-4 md:px-6 focus:outline-none focus:border-purple-500 md:w-72 text-sm transition-all flex-1 md:flex-none" />
+      <button id="settings-btn" class="hidden md:block text-gray-400 hover:text-purple-400 transition-colors" title="설정">
         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
       </button>
     </div>
   </nav>
 
+  <!-- Sidebar overlay for mobile -->
+  <div id="sidebar-drawer-overlay"></div>
+
   <!-- ═══ LAYOUT ═══ -->
-  <div class="flex h-[calc(100vh-73px)]">
+  <div class="flex main-layout h-[calc(100vh-73px)]">
 
     <!-- ─── SIDEBAR ─── -->
-    <aside class="w-72 border-r border-white/5 p-8 bg-obsidian-800 overflow-y-auto flex-shrink-0">
+    <aside id="main-sidebar" class="w-72 border-r border-white/5 p-8 bg-obsidian-800 overflow-y-auto flex-shrink-0">
       <label for="file-input" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-xl shadow-purple-900/20 mb-8">
         <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd"/></svg>
         시나리오 입고
@@ -112,7 +286,7 @@
     </aside>
 
     <!-- ─── MAIN GRID ─── -->
-    <main class="flex-1 overflow-y-auto p-10 bg-obsidian-900">
+    <main id="main-content" class="flex-1 overflow-y-auto p-10 bg-obsidian-900">
       <div id="scenario-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-8"></div>
     </main>
   </div>
@@ -122,25 +296,27 @@
     <div class="bg-obsidian-800 border border-white/10 rounded-3xl w-full max-w-6xl h-[90vh] overflow-hidden flex shadow-2xl">
 
       <!-- Left panel -->
-      <div class="w-80 bg-obsidian-900 p-8 border-r border-white/5 flex flex-col items-center flex-shrink-0">
+      <div id="edit-left-panel" class="w-80 bg-obsidian-900 p-8 border-r border-white/5 flex flex-col items-center flex-shrink-0">
         <img id="edit-thumb" class="w-full aspect-[3/4] object-cover rounded-xl shadow-2xl mb-6 bg-obsidian-700" src="" alt="" />
-        <button id="ai-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 py-4 rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-900/20 mb-3">✨ AI 서적 큐레이팅</button>
-        <button id="open-pdf-btn" class="w-full bg-obsidian-700 hover:bg-obsidian-600 border border-white/10 py-3.5 rounded-xl text-sm font-bold transition-all mb-3">📄 PDF 읽기</button>
-        <button id="delete-scenario-btn" class="w-full py-3 rounded-xl text-sm font-semibold transition-all border border-red-500/25 text-red-400 hover:bg-red-500/10">🗑️ 시나리오 삭제</button>
-        <div class="text-[10px] text-gray-600 text-center leading-relaxed mt-4">AI 큐레이팅은 마크다운 형식의 전문 분석을 수행합니다</div>
+        <div id="edit-action-buttons" class="w-full flex flex-col gap-2">
+          <button id="ai-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 py-4 rounded-xl text-sm font-bold transition-all shadow-lg shadow-purple-900/20">✨ AI 서적 큐레이팅</button>
+          <button id="open-pdf-btn" class="w-full bg-obsidian-700 hover:bg-obsidian-600 border border-white/10 py-3.5 rounded-xl text-sm font-bold transition-all">📄 PDF 읽기</button>
+          <button id="delete-scenario-btn" class="w-full py-3 rounded-xl text-sm font-semibold transition-all border border-red-500/25 text-red-400 hover:bg-red-500/10">🗑️ 시나리오 삭제</button>
+        </div>
+        <div id="edit-ai-caption" class="text-[10px] text-gray-600 text-center leading-relaxed mt-4">AI 큐레이팅은 마크다운 형식의 전문 분석을 수행합니다</div>
       </div>
 
       <!-- Right panel -->
-      <div class="flex-1 p-10 overflow-y-auto">
+      <div id="edit-right-panel" class="flex-1 p-10 overflow-y-auto">
         <div class="flex justify-between items-start mb-6">
           <div class="flex-1 mr-4">
             <label class="text-[10px] uppercase text-purple-400 font-bold mb-1 block">Scenario Title</label>
             <input type="text" id="edit-title" class="w-full bg-transparent text-3xl font-bold font-display tracking-tight border-b border-transparent focus:border-purple-500 outline-none pb-1" />
           </div>
-          <button onclick="closeEdit()" class="text-gray-500 hover:text-white text-2xl leading-none mt-1">&times;</button>
+          <button onclick="closeEdit()" class="text-gray-500 hover:text-white text-2xl leading-none mt-1 p-2 -mr-2">&times;</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-6 mb-6">
+        <div id="edit-fields-grid" class="grid grid-cols-2 gap-6 mb-6">
           <div class="space-y-4">
             <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Rule System</label><input type="text" id="edit-rule" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-purple-500 transition-colors" /></div>
             <div><label class="text-[10px] uppercase text-gray-500 font-bold mb-1 block">Author</label><input type="text" id="edit-author" class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-2 outline-none focus:border-purple-500 transition-colors" /></div>
@@ -283,6 +459,27 @@
         <button id="save-settings-btn" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-bold text-white transition-all">설정 저장</button>
       </div>
     </div>
+  </div>
+
+  <!-- ═══ MOBILE BOTTOM BAR ═══ -->
+  <div id="mobile-bottom-bar">
+    <button id="mb-filter-btn" onclick="toggleMobileSidebar()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M7 12h10M11 20h2"/></svg>
+      필터
+    </button>
+    <label for="file-input-mobile" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:10px;font-size:10px;color:#a78bfa;background:rgba(124,58,237,0.15);cursor:pointer;">
+      <svg style="width:22px;height:22px;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      입고
+    </label>
+    <input type="file" id="file-input-mobile" class="hidden" multiple accept=".pdf" />
+    <button onclick="exportLibrary()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v4h16v-4M12 3v13m-5-5l5 5 5-5"/></svg>
+      내보내기
+    </button>
+    <button onclick="openSettings()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      설정
+    </button>
   </div>
 
   <!-- ═══ TOAST ═══ -->
@@ -491,6 +688,7 @@ function renderSidebar() {
     function setFilter(type, value = null) {
       selectedFilter = { type, value };
       renderGrid(); renderSidebar();
+      closeMobileSidebar();
     }
 
     // ───────────────────────────────────────────────
@@ -880,9 +1078,27 @@ function renderSidebar() {
     }
 
     // ───────────────────────────────────────────────
+    // MOBILE SIDEBAR DRAWER
+    // ───────────────────────────────────────────────
+    function toggleMobileSidebar() {
+      const sidebar = document.getElementById('main-sidebar');
+      const overlay = document.getElementById('sidebar-drawer-overlay');
+      sidebar.classList.toggle('open');
+      overlay.classList.toggle('open');
+    }
+    function closeMobileSidebar() {
+      document.getElementById('main-sidebar').classList.remove('open');
+      document.getElementById('sidebar-drawer-overlay').classList.remove('open');
+    }
+    document.getElementById('sidebar-drawer-overlay').addEventListener('click', closeMobileSidebar);
+    const mobileSidebarBtn = document.getElementById('mobile-sidebar-btn');
+    if (mobileSidebarBtn) mobileSidebarBtn.onclick = toggleMobileSidebar;
+
+    // ───────────────────────────────────────────────
     // EVENT LISTENERS
     // ───────────────────────────────────────────────
     document.getElementById('file-input').onchange    = e => handleFiles(e.target.files);
+    document.getElementById('file-input-mobile').onchange = e => handleFiles(e.target.files);
     document.getElementById('import-input').onchange  = e => importLibrary(e.target.files[0]);
     document.getElementById('search-input').oninput   = renderGrid;
     document.getElementById('settings-btn').onclick   = openSettings;
