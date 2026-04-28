@@ -3,18 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARCANE SHELF — TRPG 시나리오 라이브러리</title>
+  <title>ARCANE SHELF V3 — 고급 AI 라이브러리</title>
 
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- pdf.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&family=JetBrains+Mono&display=swap" rel="stylesheet" />
 
   <script>
     tailwind.config = {
@@ -27,332 +20,275 @@
             mono: ['JetBrains Mono', 'monospace'],
           },
           colors: {
-            obsidian: {
-              900: '#0a0a0f',
-              800: '#12121a',
-              700: '#1a1a24',
-            },
-            arcane: {
-              gold: '#d4af37',
-              silver: '#c0c0c0',
-              purple: '#6d28d9',
-            }
+            obsidian: { 900: '#050508', 800: '#0a0a0f', 700: '#12121a' },
+            arcane: { gold: '#d4af37', purple: '#7c3aed' }
           }
         }
       }
     }
   </script>
 
-  <style type="text/css">
-    body { background-color: #0a0a0f; color: #e2e8f0; }
-    .shelf-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
-    .shelf-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px -5px rgba(109, 40, 217, 0.3); }
-    .glass-nav { background: rgba(18, 18, 26, 0.8); backdrop-filter: blur(10px); }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #0a0a0f; }
-    ::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
+  <style>
+    body { background-color: #050508; color: #e2e8f0; }
+    .glass-nav { background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .shelf-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid rgba(255,255,255,0.03); }
+    .shelf-card:hover { transform: translateY(-8px); border-color: rgba(124, 58, 237, 0.4); box-shadow: 0 20px 40px -15px rgba(0,0,0,0.5); }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #1a1a24; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
   </style>
 </head>
 <body class="font-sans antialiased">
 
-  <!-- NAVIGATION -->
-  <nav class="glass-nav sticky top-0 z-50 border-b border-white/5 py-4 px-6 flex justify-between items-center">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 bg-gradient-to-br from-purple-600 to-indigo-800 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20">
-        <span class="font-display font-bold text-xl text-white">A</span>
+  <nav class="glass-nav sticky top-0 z-50 py-4 px-8 flex justify-between items-center">
+    <div class="flex items-center gap-4">
+      <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20">
+        <span class="font-display font-black text-white text-xl">A</span>
       </div>
-      <h1 class="font-display font-bold text-2xl tracking-widest text-white">ARCANE <span class="text-purple-400">SHELF</span></h1>
+      <h1 class="font-display font-bold text-2xl tracking-tighter text-white">ARCANE <span class="text-purple-500">SHELF</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.0</span></h1>
     </div>
     
-    <div class="flex items-center gap-4">
-      <div class="relative group">
-        <input type="text" id="search-input" placeholder="시나리오 검색..." class="bg-obsidian-800 border border-white/10 rounded-full py-2 px-10 focus:outline-none focus:border-purple-500 w-64 transition-all" />
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-3 top-2.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>
-      </div>
-      <button id="settings-btn" class="p-2 hover:bg-white/5 rounded-full text-gray-400 hover:text-white transition-colors">
+    <div class="flex items-center gap-6">
+      <input type="text" id="search-input" placeholder="아카이브 검색..." class="bg-obsidian-700 border border-white/5 rounded-full py-2 px-6 focus:outline-none focus:border-purple-500 w-72 text-sm transition-all" />
+      <button id="settings-btn" class="text-gray-400 hover:text-purple-400 transition-colors">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
       </button>
     </div>
   </nav>
 
   <div class="flex h-[calc(100vh-73px)]">
-    <!-- SIDEBAR -->
-    <aside id="sidebar" class="w-64 border-r border-white/5 p-6 overflow-y-auto shrink-0 bg-obsidian-900">
-      <div class="mb-8">
-        <label for="file-input" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-all shadow-lg shadow-purple-900/40">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
-          PDF 추가
-        </label>
-        <input type="file" id="file-input" class="hidden" multiple accept=".pdf" />
-      </div>
-
-      <div id="filter-container">
-        <!-- Filters will be rendered here -->
-      </div>
+    <aside class="w-72 border-r border-white/5 p-8 overflow-y-auto bg-obsidian-800">
+      <label for="file-input" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-3 cursor-pointer transition-all shadow-xl shadow-purple-900/20 mb-10">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+        시나리오 입고
+      </label>
+      <input type="file" id="file-input" class="hidden" multiple accept=".pdf" />
+      <div id="filter-container" class="space-y-8"></div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <main id="main-content" class="flex-1 overflow-y-auto p-8 relative">
-      <!-- Welcome Screen (Empty State) -->
-      <div id="empty-state" class="hidden flex flex-col items-center justify-center h-full text-center">
-        <div class="w-24 h-24 text-gray-700 mb-6">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25c.938-.332 1.948-.512 3-.512 2.797 0 5.398 1.365 7 3.596 1.602-2.231 4.203-3.596 7-3.596 1.052 0 2.062.18 3 .512V4.262c-.938-.332-1.948-.512-3-.512a8.967 8.967 0 00-6 2.292m0 14.25v-14.25" /></svg>
-        </div>
-        <h2 class="text-3xl font-display font-bold mb-2">아카이브가 비어 있습니다</h2>
-        <p class="text-gray-500 mb-8 max-w-sm">PDF 파일을 드래그하여 드롭하거나 버튼을 눌러 시나리오를 추가하세요.</p>
-        <label for="empty-file-input" class="text-purple-400 hover:text-purple-300 font-bold border-2 border-purple-900/50 hover:border-purple-500/50 rounded-lg px-6 py-2 transition-all cursor-pointer">파일 선택하기</label>
-        <input type="file" id="empty-file-input" class="hidden" multiple accept=".pdf" />
-      </div>
-
-      <!-- Grid -->
-      <div id="scenario-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8">
-        <!-- Cards will be rendered here -->
-      </div>
+    <main class="flex-1 overflow-y-auto p-10 bg-obsidian-900">
+      <div id="scenario-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-7 gap-8"></div>
     </main>
   </div>
 
-  <!-- EDIT MODAL -->
-  <div id="edit-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-obsidian-800 border border-white/10 rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col md:flex-row">
-      <div class="w-full md:w-1/3 bg-obsidian-900 p-6 flex flex-col items-center">
-        <img id="edit-thumb" class="w-full aspect-[3/4] object-cover rounded shadow-lg mb-4" src="" />
-        <button id="ai-btn" class="w-full bg-indigo-600 hover:bg-indigo-500 py-2 rounded text-sm font-bold transition-all flex items-center justify-center gap-2">
-          <span>✨ AI 요약 생성</span>
+  <div id="edit-modal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-[60] hidden flex items-center justify-center p-6">
+    <div class="bg-obsidian-800 border border-white/10 rounded-3xl w-full max-w-5xl h-[85vh] overflow-hidden flex shadow-2xl">
+      <div class="w-80 bg-obsidian-900 p-8 border-r border-white/5 flex flex-col">
+        <img id="edit-thumb" class="w-full aspect-[3/4] object-cover rounded-xl shadow-2xl mb-6" src="" />
+        <button id="ai-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-900/20">
+          <span>✨ AI 전문 분석 요약</span>
         </button>
+        <div class="mt-4 text-[10px] text-gray-500 text-center">전체 페이지의 텍스트를 추출하여 분석합니다.<br>대용량 파일은 시간이 걸릴 수 있습니다.</div>
       </div>
-      <div class="w-full md:w-2/3 p-8">
-        <div class="flex justify-between items-start mb-6">
-          <h2 class="text-2xl font-bold" id="edit-title-display">정보 수정</h2>
-          <button onclick="closeEdit()" class="text-gray-500 hover:text-white">&times;</button>
+      
+      <div class="flex-1 p-10 overflow-y-auto">
+        <div class="flex justify-between items-start mb-8">
+          <h2 class="text-3xl font-bold font-display tracking-tight" id="edit-title-display">Scenario Detail</h2>
+          <button onclick="closeEdit()" class="text-gray-500 hover:text-white text-2xl">&times;</button>
         </div>
         
-        <div class="space-y-4">
-          <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-8 mb-8">
+          <div class="space-y-6">
             <div>
-              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">룰 시스템</label>
-              <input type="text" id="edit-rule" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 focus:border-purple-500 focus:outline-none" />
+              <label class="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-2 block">System</label>
+              <input type="text" id="edit-rule" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" />
             </div>
             <div>
-              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">저자 / 라이터</label>
-              <input type="text" id="edit-author" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 focus:border-purple-500 focus:outline-none" />
+              <label class="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-2 block">Author</label>
+              <input type="text" id="edit-author" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" />
             </div>
           </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">플레이 인원</label>
-            <input type="text" id="edit-players" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 focus:border-purple-500 focus:outline-none" />
+          <div class="space-y-6">
+            <div>
+              <label class="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-2 block">Players</label>
+              <input type="text" id="edit-players" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" />
+            </div>
+            <div>
+              <label class="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-2 block">Tags</label>
+              <input type="text" id="edit-tags" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" />
+            </div>
           </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">태그 (쉼표로 구분)</label>
-            <input type="text" id="edit-tags" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 focus:border-purple-500 focus:outline-none" />
-          </div>
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-1">시나리오 요약</label>
-            <textarea id="edit-summary" rows="4" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 focus:border-purple-500 focus:outline-none resize-none"></textarea>
-          </div>
-          
-          <div class="flex gap-3 pt-4">
-            <button id="save-edit-btn" class="flex-1 bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-bold transition-all">저장하기</button>
-            <button id="open-pdf-btn" class="flex-1 border border-white/20 hover:bg-white/5 py-3 rounded-lg font-bold transition-all">PDF 열기</button>
-          </div>
+        </div>
+
+        <div class="mb-8">
+          <label class="text-[10px] uppercase tracking-widest text-purple-400 font-bold mb-2 block">Summary</label>
+          <textarea id="edit-summary" rows="8" class="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 focus:border-purple-500 outline-none resize-none leading-relaxed text-gray-300"></textarea>
+        </div>
+        
+        <div class="flex gap-4">
+          <button id="save-edit-btn" class="flex-1 bg-white text-black hover:bg-gray-200 py-4 rounded-xl font-bold transition-all">설정 저장</button>
+          <button id="open-pdf-btn" class="flex-1 bg-obsidian-700 hover:bg-obsidian-600 border border-white/10 py-4 rounded-xl font-bold transition-all">PDF 읽기</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- SETTINGS MODAL -->
-  <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center p-4">
-    <div class="bg-obsidian-800 border border-white/10 rounded-2xl w-full max-w-md p-8">
-      <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold">환경 설정</h2>
+  <div id="settings-modal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[70] hidden flex items-center justify-center p-6">
+    <div class="bg-obsidian-800 border border-white/10 rounded-3xl w-full max-w-2xl p-10 shadow-2xl">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-2xl font-bold font-display">AI Configuration</h2>
         <button onclick="closeSettings()" class="text-gray-500 hover:text-white">&times;</button>
       </div>
 
       <div class="space-y-6">
-        <div>
-          <label class="block text-sm text-gray-400 mb-2">AI 서비스 제공자</label>
-          <select id="api-provider" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2">
-            <option value="gemini">Google Gemini (Recommended)</option>
-            <option value="openai">OpenAI ChatGPT</option>
-            <option value="claude">Anthropic Claude</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm text-gray-400 mb-2">API 키</label>
-          <div class="relative">
-            <input type="password" id="api-key-input" class="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 pr-10" placeholder="sk-..." />
-            <button id="toggle-key-vis" class="absolute right-3 top-2 text-gray-500 hover:text-white">👁️</button>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-gray-500 uppercase tracking-widest mb-2">Provider</label>
+            <select id="api-provider" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none">
+              <option value="gemini">Google Gemini</option>
+              <option value="openai">OpenAI ChatGPT</option>
+              <option value="anthropic">Anthropic Claude</option>
+            </select>
           </div>
-          <p class="text-[10px] text-gray-500 mt-1">API 키는 브라우저 로컬 저장소에만 저장됩니다.</p>
+          <div>
+            <label class="block text-xs text-gray-500 uppercase tracking-widest mb-2">Model Name</label>
+            <input type="text" id="api-model" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" placeholder="gemini-1.5-pro" />
+          </div>
         </div>
-        <div class="pt-4 border-t border-white/5">
-          <button id="save-settings-btn" class="w-full bg-purple-600 hover:bg-purple-700 py-3 rounded-lg font-bold">설정 저장</button>
-          <button id="clear-db-btn" class="w-full mt-3 text-red-400 text-sm hover:underline">모든 라이브러리 데이터 초기화</button>
+
+        <div>
+          <label class="block text-xs text-gray-500 uppercase tracking-widest mb-2">API Key</label>
+          <input type="password" id="api-key-input" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" placeholder="키를 입력하세요..." />
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-500 uppercase tracking-widest mb-2">Custom Summary Prompt</label>
+          <textarea id="api-prompt" rows="4" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none resize-none text-sm" placeholder="예: 이 TRPG 시나리오의 전체 내용을 분석해서 줄거리와 주요 NPC, 엔딩 분기를 요약해줘."></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs text-gray-500 uppercase tracking-widest mb-2">Target Summary Length (Chars)</label>
+            <input type="number" id="api-length" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:border-purple-500 outline-none" value="500" />
+          </div>
+          <div class="flex items-end">
+            <button id="save-settings-btn" class="w-full bg-purple-600 hover:bg-purple-500 py-3 rounded-xl font-bold shadow-lg shadow-purple-900/20">설정 저장</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- TOAST -->
-  <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full bg-white text-black font-bold shadow-2xl z-[100] transition-all opacity-0 pointer-events-none"></div>
+  <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl bg-white text-black font-bold shadow-2xl z-[100] transition-all opacity-0 pointer-events-none scale-90"></div>
 
   <script>
-    // ─────────────────────────────────────────────────────────────
-    // DATABASE & STATE
-    let db;
-    let scenarios = [];
-    let currentEditId = null;
-    let filterState = {
-      rule: 'all',
-      tag: 'all',
-      search: ''
-    };
-
-    const DB_NAME = 'arcane-shelf-v2';
+    let db, scenarios = [], currentEditId = null;
+    const DB_NAME = 'arcane-shelf-v3';
     const STORE_NAME = 'scenarios';
 
     async function openDB() {
-      return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
-        request.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          }
-        };
-        request.onsuccess = (e) => resolve(e.target.result);
-        request.onerror = (e) => reject(e.target.error);
+      return new Promise((resolve) => {
+        const req = indexedDB.open(DB_NAME, 1);
+        req.onupgradeneeded = (e) => e.target.result.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        req.onsuccess = (e) => resolve(e.target.result);
       });
     }
 
     async function dbSave(item) {
       const tx = db.transaction(STORE_NAME, 'readwrite');
       tx.objectStore(STORE_NAME).put(item);
-      return new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+      return new Promise(r => tx.oncomplete = r);
     }
 
     async function dbGetAll() {
       const tx = db.transaction(STORE_NAME, 'readonly');
-      const store = tx.objectStore(STORE_NAME);
-      const request = store.getAll();
-      return new Promise((r, j) => { request.onsuccess = () => r(request.result); request.onerror = j; });
+      const req = tx.objectStore(STORE_NAME).getAll();
+      return new Promise(r => req.onsuccess = () => r(req.result));
     }
 
-    async function dbClear() {
-      const tx = db.transaction(STORE_NAME, 'readwrite');
-      tx.objectStore(STORE_NAME).clear();
-      return new Promise(r => tx.oncomplete = r);
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // PDF LOGIC
     async function handleFiles(files) {
       if (!files.length) return;
-      showToast(`${files.length}개의 파일을 처리 중...`, 'info');
-      
+      showToast(`${files.length}개의 고서를 확인 중...`);
       for (const file of files) {
-        if (file.type !== 'application/pdf') continue;
-        
         try {
           const id = crypto.randomUUID();
           const arrayBuffer = await file.arrayBuffer();
-          const base64Pdf = arrayBufferToBase64(arrayBuffer);
-          
-          // PDFJS
-          const pdfData = new Uint8Array(arrayBuffer);
-          const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+          const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
           const page = await pdf.getPage(1);
-          
-          // Thumbnail
-          const viewport = page.getViewport({ scale: 0.5 });
+          const viewport = page.getViewport({ scale: 0.6 });
           const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d');
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          await page.render({ canvasContext: context, viewport }).promise;
-          const thumbnail = canvas.toDataURL('image/jpeg', 0.8);
-
-          // Text extraction for AI
-          let extractedText = "";
-          const pagesToExtract = Math.min(3, pdf.numPages);
-          for (let i = 1; i <= pagesToExtract; i++) {
-            const p = await pdf.getPage(i);
-            const content = await p.getTextContent();
-            extractedText += content.items.map(it => it.str).join(" ") + "\n";
-          }
+          const ctx = canvas.getContext('2d');
+          canvas.height = viewport.height; canvas.width = viewport.width;
+          await page.render({ canvasContext: ctx, viewport }).promise;
 
           const scenario = {
-            id,
-            title: file.name.replace('.pdf', ''),
-            filename: file.name,
-            rule: 'Unknown',
-            author: '',
-            players: '',
-            tags: [],
-            summary: '',
-            thumbnail,
-            extractedText: extractedText.substring(0, 4000),
-            pdfData: 'data:application/pdf;base64,' + base64Pdf,
+            id, title: file.name.replace('.pdf', ''), rule: 'Unknown', author: '', players: '', tags: [], summary: '',
+            thumbnail: canvas.toDataURL('image/jpeg', 0.8),
+            pdfData: 'data:application/pdf;base64,' + btoa(new Uint8Array(arrayBuffer).reduce((d, b) => d + String.fromCharCode(b), '')),
             addedAt: Date.now()
           };
-
           await dbSave(scenario);
           scenarios.unshift(scenario);
-          renderGrid();
-          renderSidebar();
-        } catch (err) {
-          console.error(err);
-          showToast(`파일 처리 실패: ${file.name}`, 'error');
+          renderGrid(); renderSidebar();
+        } catch (e) { showToast(`실패: ${file.name}`, 'error'); }
+      }
+      showToast('입고가 완료되었습니다.', 'success');
+    }
+
+    async function generateAISummary(id) {
+      const config = {
+        key: localStorage.getItem('arcane_key'),
+        provider: localStorage.getItem('arcane_provider') || 'gemini',
+        model: localStorage.getItem('arcane_model') || 'gemini-1.5-pro',
+        prompt: localStorage.getItem('arcane_prompt') || '이 시나리오의 줄거리와 주요 특징을 요약해줘.',
+        length: localStorage.getItem('arcane_length') || 500
+      };
+
+      if (!config.key) { showToast('API 키가 없습니다.', 'error'); return openSettings(); }
+      const sc = scenarios.find(s => s.id === id);
+      showToast('전문 텍스트를 추출하는 중...');
+
+      try {
+        const pdfData = dataURLtoBlob(sc.pdfData);
+        const arrayBuffer = await pdfData.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        let fullText = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          fullText += textContent.items.map(it => it.str).join(' ') + "\\n";
+          if (fullText.length > 30000) break;
         }
+        showToast('AI가 고서를 읽고 있습니다...');
+        const finalPrompt = `${config.prompt}\\n\\n결과물 길이는 약 ${config.length}자 정도로 작성해줘.\\n\\n내용:\\n${fullText}`;
+        let resultSummary = "";
+
+        if (config.provider === 'gemini') {
+          const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.key}`, {
+            method: 'POST',
+            body: JSON.stringify({ contents: [{ parts: [{ text: finalPrompt }] }] })
+          });
+          const data = await resp.json();
+          resultSummary = data.candidates[0].content.parts[0].text;
+        } else if (config.provider === 'openai') {
+          const resp = await fetch(`https://api.openai.com/v1/chat/completions`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${config.key}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: config.model, messages: [{ role: 'user', content: finalPrompt }] })
+          });
+          const data = await resp.json();
+          resultSummary = data.choices[0].message.content;
+        }
+
+        document.getElementById('edit-summary').value = resultSummary;
+        showToast('분석이 완료되었습니다.', 'success');
+      } catch (err) {
+        showToast('AI 분석 실패. API 설정을 확인하세요.', 'error');
       }
-      showToast('완료되었습니다', 'success');
     }
 
-    function arrayBufferToBase64(buffer) {
-      let binary = '';
-      const bytes = new Uint8Array(buffer);
-      const len = bytes.byteLength;
-      for (let i = 0; i < len; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      return window.btoa(binary);
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // RENDER LOGIC
     function renderGrid() {
       const grid = document.getElementById('scenario-grid');
-      const empty = document.getElementById('empty-state');
-      
-      const filtered = scenarios.filter(s => {
-        const matchRule = filterState.rule === 'all' || s.rule === filterState.rule;
-        const matchTag = filterState.tag === 'all' || s.tags.includes(filterState.tag);
-        const matchSearch = !filterState.search || 
-                            s.title.toLowerCase().includes(filterState.search.toLowerCase()) ||
-                            s.author.toLowerCase().includes(filterState.search.toLowerCase());
-        return matchRule && matchTag && matchSearch;
-      });
-
-      if (scenarios.length === 0) {
-        grid.innerHTML = '';
-        empty.classList.remove('hidden');
-        return;
-      }
-      
-      empty.classList.add('hidden');
+      const term = document.getElementById('search-input').value.toLowerCase();
+      const filtered = scenarios.filter(s => s.title.toLowerCase().includes(term));
       grid.innerHTML = filtered.map(s => `
         <div class="shelf-card group cursor-pointer" onclick="openEdit('${s.id}')">
-          <div class="relative aspect-[3/4] overflow-hidden rounded-xl bg-obsidian-700 border border-white/5">
-            <img src="${s.thumbnail}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-              <span class="text-[10px] uppercase tracking-tighter text-purple-300 font-bold">${s.rule}</span>
+          <div class="relative aspect-[3/4] overflow-hidden rounded-2xl bg-obsidian-700">
+            <img src="${s.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent flex flex-col justify-end p-5 opacity-0 group-hover:opacity-100 transition-opacity">
+               <p class="text-[9px] text-purple-400 font-bold uppercase tracking-widest mb-1">${s.rule}</p>
+               <h3 class="text-white font-bold text-sm leading-tight">${s.title}</h3>
             </div>
-          </div>
-          <div class="mt-3">
-            <h3 class="font-bold text-sm truncate text-gray-200">${s.title}</h3>
-            <p class="text-xs text-gray-500 truncate">${s.author || '저자 미상'}</p>
           </div>
         </div>
       `).join('');
@@ -360,46 +296,20 @@
 
     function renderSidebar() {
       const container = document.getElementById('filter-container');
-      const rules = ['all', ...new Set(scenarios.map(s => s.rule))];
-      const tags = ['all', ...new Set(scenarios.flatMap(s => s.tags))];
-
+      const rules = ['All', ...new Set(scenarios.map(s => s.rule))];
       container.innerHTML = `
-        <div class="mb-6">
-          <h4 class="text-[10px] uppercase tracking-widest text-gray-500 mb-3">시스템 분류</h4>
-          <div class="flex flex-col gap-1">
-            ${rules.map(r => `
-              <button onclick="setFilter('rule', '${r}')" class="text-left text-sm py-1 px-2 rounded hover:bg-white/5 transition-colors ${filterState.rule === r ? 'text-purple-400 font-bold bg-white/5' : 'text-gray-400'}">
-                ${r === 'all' ? '전체 보기' : r}
-              </button>
-            `).join('')}
-          </div>
-        </div>
         <div>
-          <h4 class="text-[10px] uppercase tracking-widest text-gray-500 mb-3">태그 클라우드</h4>
-          <div class="flex flex-wrap gap-2">
-            ${tags.map(t => `
-              <button onclick="setFilter('tag', '${t}')" class="text-[10px] px-2 py-1 rounded border ${filterState.tag === t ? 'border-purple-500 text-purple-400 bg-purple-500/10' : 'border-white/10 text-gray-500 hover:border-white/30'}">
-                #${t === 'all' ? '전체' : t}
-              </button>
-            `).join('')}
+          <h4 class="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-4 font-bold">System Filter</h4>
+          <div class="flex flex-col gap-2">
+            ${rules.map(r => `<button class="text-left text-sm py-2 px-3 rounded-lg hover:bg-white/5 transition-all text-gray-400 hover:text-white">${r}</button>`).join('')}
           </div>
         </div>
       `;
     }
 
-    function setFilter(key, val) {
-      filterState[key] = val;
-      renderGrid();
-      renderSidebar();
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // MODAL & ACTION LOGIC
     function openEdit(id) {
       currentEditId = id;
       const s = scenarios.find(item => item.id === id);
-      if (!s) return;
-
       document.getElementById('edit-title-display').innerText = s.title;
       document.getElementById('edit-thumb').src = s.thumbnail;
       document.getElementById('edit-rule').value = s.rule;
@@ -407,192 +317,82 @@
       document.getElementById('edit-players').value = s.players;
       document.getElementById('edit-tags').value = s.tags.join(', ');
       document.getElementById('edit-summary').value = s.summary;
-
-      document.getElementById('open-pdf-btn').onclick = () => openPDF(s.id);
-      document.getElementById('ai-btn').onclick = () => generateAISummary(s.id);
-
+      document.getElementById('open-pdf-btn').onclick = () => openPDF(id);
+      document.getElementById('ai-btn').onclick = () => generateAISummary(id);
       document.getElementById('edit-modal').classList.remove('hidden');
     }
 
-    function closeEdit() {
-      document.getElementById('edit-modal').classList.add('hidden');
-      currentEditId = null;
-    }
-
+    function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
+    
     async function saveEdit() {
       const idx = scenarios.findIndex(s => s.id === currentEditId);
-      if (idx === -1) return;
-
       scenarios[idx].rule = document.getElementById('edit-rule').value;
       scenarios[idx].author = document.getElementById('edit-author').value;
       scenarios[idx].players = document.getElementById('edit-players').value;
       scenarios[idx].tags = document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(t => t);
       scenarios[idx].summary = document.getElementById('edit-summary').value;
-
       await dbSave(scenarios[idx]);
-      renderGrid();
-      renderSidebar();
-      closeEdit();
-      showToast('정보가 업데이트되었습니다', 'success');
+      renderGrid(); renderSidebar(); closeEdit();
+      showToast('아카이브가 업데이트되었습니다.');
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // FIX: Updated openPDF function using Blob URL for stability
-    function openPDF(id) {
-      const sc = scenarios.find(s => s.id === id);
-      if (!sc || !sc.pdfData) { 
-        showToast('PDF 데이터를 찾을 수 없습니다', 'error'); 
-        return; 
-      }
-
-      try {
-        // 1. Convert Base64(Data URL) to a Blob object
-        const blob = dataURLtoBlob(sc.pdfData);
-        
-        // 2. Create a temporary URL for the browser to open
-        const url = URL.createObjectURL(blob);
-        
-        // 3. Open in a new tab (uses native PDF viewer)
-        const win = window.open(url, '_blank');
-        
-        if (!win) {
-          showToast('팝업이 차단되었습니다. 팝업 허용을 해주세요.', 'error');
-        }
-
-        // 4. Memory management: Revoke URL after a minute
-        setTimeout(() => URL.revokeObjectURL(url), 60000);
-        
-      } catch (err) {
-        console.error('PDF 열기 실패:', err);
-        showToast('PDF를 여는 중 오류가 발생했습니다.', 'error');
-      }
-    }
-
-    // Helper: Base64 to Blob
-    function dataURLtoBlob(dataurl) {
-      const arr = dataurl.split(',');
-      const mime = arr[0].match(/:(.*?);/)[1];
-      const bstr = atob(arr[1]);
-      let n = bstr.length;
-      const u8arr = new Uint8Array(n);
-      while (n--) {
-        u8arr[n] = bstr.charCodeAt(n);
-      }
-      return new Blob([u8arr], { type: mime });
-    }
-
-    // AI Summary placeholder logic
-    async function generateAISummary(id) {
-      const apiKey = localStorage.getItem('arcane_api_key');
-      if (!apiKey) {
-        showToast('API 키를 먼저 설정해 주세요', 'error');
-        openSettings();
-        return;
-      }
-      
-      const sc = scenarios.find(s => s.id === id);
-      showToast('AI가 시나리오를 분석 중입니다...', 'info');
-      
-      // Actual implementation would call Gemini/OpenAI API here
-      // For now, let's pretend and just update local state
-      setTimeout(() => {
-        const result = "이 시나리오는 폐쇄된 저택에서 벌어지는 미스터리 스릴러입니다. 플레이어들은 실종된 저택의 주인을 찾기 위해 흩어진 단서를 조합해야 하며, 자정에 숨겨진 진실이 밝혀집니다.";
-        document.getElementById('edit-summary').value = result;
-        showToast('AI 요약이 완료되었습니다', 'success');
-      }, 2000);
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // SETTINGS
     function openSettings() {
-      document.getElementById('api-key-input').value = localStorage.getItem('arcane_api_key') || '';
-      document.getElementById('api-provider').value = localStorage.getItem('arcane_api_provider') || 'gemini';
+      document.getElementById('api-key-input').value = localStorage.getItem('arcane_key') || '';
+      document.getElementById('api-provider').value = localStorage.getItem('arcane_provider') || 'gemini';
+      document.getElementById('api-model').value = localStorage.getItem('arcane_model') || 'gemini-1.5-pro';
+      document.getElementById('api-prompt').value = localStorage.getItem('arcane_prompt') || '이 시나리오의 줄거리와 주요 특징을 요약해줘.';
+      document.getElementById('api-length').value = localStorage.getItem('arcane_length') || 500;
       document.getElementById('settings-modal').classList.remove('hidden');
     }
 
-    function closeSettings() {
-      document.getElementById('settings-modal').classList.add('hidden');
-    }
+    function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
 
     function saveSettings() {
-      const key = document.getElementById('api-key-input').value;
-      const provider = document.getElementById('api-provider').value;
-      localStorage.setItem('arcane_api_key', key);
-      localStorage.setItem('arcane_api_provider', provider);
+      localStorage.setItem('arcane_key', document.getElementById('api-key-input').value);
+      localStorage.setItem('arcane_provider', document.getElementById('api-provider').value);
+      localStorage.setItem('arcane_model', document.getElementById('api-model').value);
+      localStorage.setItem('arcane_prompt', document.getElementById('api-prompt').value);
+      localStorage.setItem('arcane_length', document.getElementById('api-length').value);
       closeSettings();
-      showToast('설정이 저장되었습니다', 'success');
+      showToast('마법 설정이 저장되었습니다.', 'success');
     }
 
-    function loadSettings() {
-      // Logic for initial load if needed
+    function openPDF(id) {
+      const sc = scenarios.find(s => s.id === id);
+      const url = URL.createObjectURL(dataURLtoBlob(sc.pdfData));
+      window.open(url, '_blank');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // UTILS
+    function dataURLtoBlob(dataurl) {
+      const arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]); let n = bstr.length, u8arr = new Uint8Array(n);
+      while(n--) u8arr[n] = bstr.charCodeAt(n);
+      return new Blob([u8arr], {type:mime});
+    }
+
     function showToast(msg, type = 'info') {
       const t = document.getElementById('toast');
       t.innerText = msg;
-      t.className = `fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full font-bold shadow-2xl z-[100] transition-all duration-300 opacity-100 `;
-      
-      if (type === 'error') t.classList.add('bg-red-600', 'text-white');
-      else if (type === 'success') t.classList.add('bg-green-600', 'text-white');
+      t.className = `fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl font-bold shadow-2xl z-[100] transition-all duration-500 opacity-100 scale-100 `;
+      if(type === 'error') t.classList.add('bg-red-500', 'text-white');
+      else if(type === 'success') t.classList.add('bg-purple-600', 'text-white');
       else t.classList.add('bg-white', 'text-black');
-
-      setTimeout(() => {
-        t.style.opacity = '0';
-      }, 3000);
+      setTimeout(() => { t.classList.replace('opacity-100', 'opacity-0'); t.classList.replace('scale-100', 'scale-90'); }, 3000);
     }
 
-    function setupDropZone() {
-      const zone = document.body;
-      zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('bg-purple-900/5'); });
-      zone.addEventListener('dragleave', () => zone.classList.remove('bg-purple-900/5'));
-      zone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        zone.classList.remove('bg-purple-900/5');
-        handleFiles(e.dataTransfer.files);
-      });
-    }
-
-    // Event Listeners
     document.getElementById('file-input').addEventListener('change', (e) => handleFiles(e.target.files));
-    document.getElementById('empty-file-input').addEventListener('change', (e) => handleFiles(e.target.files));
-    document.getElementById('search-input').addEventListener('input', (e) => {
-      filterState.search = e.target.value;
-      renderGrid();
-    });
+    document.getElementById('search-input').addEventListener('input', renderGrid);
     document.getElementById('settings-btn').addEventListener('click', openSettings);
     document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
     document.getElementById('save-edit-btn').addEventListener('click', saveEdit);
-    document.getElementById('toggle-key-vis').addEventListener('click', () => {
-      const inp = document.getElementById('api-key-input');
-      inp.type = inp.type === 'password' ? 'text' : 'password';
-    });
-    document.getElementById('clear-db-btn').addEventListener('click', async () => {
-      if (!confirm('모든 시나리오를 삭제합니다. 이 작업은 되돌릴 수 없습니다.')) return;
-      await dbClear();
-      scenarios = [];
-      closeSettings();
-      renderGrid();
-      renderSidebar();
-      showToast('라이브러리가 초기화되었습니다', 'success');
-    });
 
-    // INIT
-    async function init() {
+    (async () => {
       db = await openDB();
       scenarios = await dbGetAll();
-      scenarios.sort((a, b) => b.addedAt - a.addedAt);
-      loadSettings();
-      setupDropZone();
-      renderGrid();
-      renderSidebar();
-    }
-
-    init().catch(err => {
-      console.error('Initialization failed:', err);
-      showToast('초기화 중 오류가 발생했습니다', 'error');
-    });
+      scenarios.sort((a,b) => b.addedAt - a.addedAt);
+      renderGrid(); renderSidebar();
+    })();
   </script>
 </body>
 </html>
