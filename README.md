@@ -1,7 +1,7 @@
 # 📚 ARCANE SHELF — 로컬 라이브러리
 
 > **서버 없이 브라우저만으로 작동하는 관리 웹앱**  
-> IndexedDB에 저장 · pdf.js로 표지 생성 · AI 자동 요약 · GitHub Pages 무료 배포
+> IndexedDB에 저장 · pdf.js로 표지 생성 · 자동 요약
 
 ---
 
@@ -13,7 +13,7 @@
 | 🖼️ 자동 표지 썸네일 | pdf.js가 첫 페이지를 캡처하여 카드에 표시 |
 | 💾 로컬 영구 저장 | IndexedDB에 썸네일·메타데이터·PDF 데이터 저장 (서버 없음) |
 | ✏️ 메타데이터 편집 | 룰 시스템, 라이터, 플레이 인원 직접 입력 |
-| ✨ AI 자동 요약 | Gemini / OpenAI / Claude로 줄거리 3줄 요약 + 태그 자동 생성 |
+| ✨ AI 자동 요약 | AI로 줄거리 3줄 요약 + 태그 자동 생성 |
 | 🔍 필터링 & 검색 | 룰별, 저자별, 태그별 사이드바 필터 + 키워드 검색 |
 | 📄 PDF 뷰어 | 브라우저 내장 뷰어로 즉시 읽기 |
 
@@ -35,7 +35,7 @@
 
 앱 우측 상단 ⚙️ 설정 버튼에서 입력:
 
-### Google Gemini (무료 플랜 있음, 추천)
+### Google Gemini 
 1. [Google AI Studio](https://aistudio.google.com/app/apikey) → `Get API Key`
 2. 설정 창에서 제공자: `Google Gemini` 선택
 3. API 키 입력 → 저장
