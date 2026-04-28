@@ -1,6 +1,6 @@
-# 📚 ARCANE SHELF — 로컬 TRPG 시나리오 라이브러리
+# 📚 ARCANE SHELF — 로컬 라이브러리
 
-> **서버 없이 브라우저만으로 작동하는 TRPG 시나리오 관리 웹앱**  
+> **서버 없이 브라우저만으로 작동하는 관리 웹앱**  
 > IndexedDB에 저장 · pdf.js로 표지 생성 · AI 자동 요약 · GitHub Pages 무료 배포
 
 ---
