@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ARCANE SHELF — TRPG 시나리오 라이브러리</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- pdf.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Cinzel', 'serif'],
+            sans: ['Noto Sans KR', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: { 900: '#0a0a0f', 800: '#111118', 700: '#1a1a24', 600: '#222230', 500: '#2e2e40' },
+            arcane: { 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9' },
+            crimson: { 400: '#f87171', 500: '#ef4444' },
+            amber: { 400: '#fbbf24', 300: '#fcd34d' },
+            jade: { 400: '#34d399', 500: '#10b981' },
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.3s ease-out',
+            'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+            'shimmer': 'shimmer 1.5s infinite',
+            'float': 'float 3s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+            slideUp: { from: { opacity: 0, transform: 'translateY(24px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+            shimmer: { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
+            float: { '0%,100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-6px)' } },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    :root {
+      --grid-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: #0a0a0f;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 50% -20%, rgba(139,92,246,0.15) 0%, transparent 60%),
+        var(--grid-noise);
+      color: #e2e2f0;
+      font-family: 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #111118; }
+    ::-webkit-scrollbar-thumb { background: #3b3b55; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #8b5cf6; }
+
+    /* Card hover effects */
+    .scenario-card {
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+      will-change: transform;
+    }
+    .scenario-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 24px 60px rgba(139, 92, 246, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.2);
+    }
+
+    /* Thumbnail container */
+    .thumb-container {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(135deg, #1a1a30, #0f0f1e);
+    }
+    .thumb-container canvas, .thumb-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Shimmer loading */
+    .shimmer-bg {
+      background: linear-gradient(90deg, #1a1a24 25%, #222230 50%, #1a1a24 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+    }
+
+    /* Modal backdrop blur */
+    .modal-backdrop {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    /* Tag pill */
+    .tag-pill {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* Sidebar */
+    #sidebar { transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+
+    /* Drop zone */
+    .drop-zone-active {
+      border-color: #8b5cf6 !important;
+      background: rgba(139,92,246,0.08) !important;
+      box-shadow: inset 0 0 40px rgba(139,92,246,0.1);
+    }
+
+    /* Progress bar */
+    .progress-fill { transition: width 0.4s ease; }
+
+    /* Detail panel */
+    #detail-panel {
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    #detail-panel.hidden-panel {
+      transform: translateX(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Custom select */
+    select { -webkit-appearance: none; appearance: none; }
+
+    /* Cinzel headings */
+    .font-display { font-family: 'Cinzel', serif; }
+
+    /* Glow text */
+    .glow-text { text-shadow: 0 0 20px rgba(167,139,250,0.6), 0 0 40px rgba(139,92,246,0.3); }
+
+    /* Decorative line */
+    .deco-line {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(139,92,246,0.5), transparent);
+    }
+
+    /* Input focus ring */
+    .arcane-input:focus {
+      outline: none;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 2px rgba(139,92,246,0.25);
+    }
+
+    /* PDF no-thumb placeholder */
+    .no-thumb {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1a1a30 0%, #0f0f1e 100%);
+      color: #4a4a6a;
+      font-family: 'Cinzel', serif;
+      font-size: 2.5rem;
+    }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem; }
+    .toast {
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slideUp 0.3s ease;
+      max-width: 320px;
+      border: 1px solid;
+    }
+    .toast-success { background: rgba(16,185,129,0.15); border-color: rgba(52,211,153,0.3); color: #34d399; }
+    .toast-error { background: rgba(239,68,68,0.15); border-color: rgba(248,113,113,0.3); color: #f87171; }
+    .toast-info { background: rgba(139,92,246,0.15); border-color: rgba(167,139,250,0.3); color: #a78bfa; }
+  </style>
+</head>
+<body class="dark">
+
+<!-- ═══════════════════════════════════════════════ HEADER ══ -->
+<header class="sticky top-0 z-40 border-b border-white/5" style="background: rgba(10,10,15,0.85); backdrop-filter: blur(20px);">
+  <div class="max-w-screen-2xl mx-auto px-6 h-16 flex items-center justify-between gap-4">
+
+    <!-- Logo -->
+    <div class="flex items-center gap-3 shrink-0">
+      <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg,#7c3aed,#4f46e5);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <span class="font-display font-bold text-lg tracking-wider text-white glow-text hidden sm:block">ARCANE SHELF</span>
+    </div>
+
+    <!-- Search bar -->
+    <div class="flex-1 max-w-md relative">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="search-input" type="text" placeholder="제목, 저자, 룰 시스템 검색…"
+        class="arcane-input w-full pl-9 pr-4 py-2 rounded-lg text-sm text-white placeholder-gray-500 border border-white/10 transition-all"
+        style="background: rgba(255,255,255,0.05);" />
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 shrink-0">
+      <!-- Import file button -->
+      <label class="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95"
+        style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <span class="hidden sm:inline">PDF 추가</span>
+        <input id="file-input" type="file" accept=".pdf" multiple class="hidden" />
+      </label>
+
+      <!-- Settings button -->
+      <button id="settings-btn" class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-arcane-500 transition-all"
+        style="background: rgba(255,255,255,0.04);">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+
+      <!-- Sidebar toggle -->
+      <button id="filter-toggle" class="w-9 h-9 flex items-center justify-center rounded-lg border border-white/10 text-gray-400 hover:text-white hover:border-arcane-500 transition-all"
+        style="background: rgba(255,255,255,0.04);">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════ MAIN LAYOUT ══ -->
+<div class="flex max-w-screen-2xl mx-auto">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside id="sidebar" class="w-64 shrink-0 border-r border-white/5 min-h-screen px-4 py-6 sticky top-16 h-[calc(100vh-4rem)] overflow-y-auto hidden lg:block"
+    style="background: rgba(10,10,15,0.6);">
+    <div id="sidebar-content">
+      <!-- Rendered by JS -->
+    </div>
+  </aside>
+
+  <!-- ─── CONTENT AREA ─── -->
+  <main class="flex-1 px-6 py-8 min-w-0">
+
+    <!-- Drop zone -->
+    <div id="drop-zone" class="border-2 border-dashed border-white/10 rounded-2xl p-12 mb-8 text-center transition-all cursor-pointer hidden"
+      style="background: rgba(255,255,255,0.02);">
+      <div class="font-display text-gray-500 text-lg mb-2">📜 여기에 PDF를 드래그하세요</div>
+      <p class="text-gray-600 text-sm">여러 파일을 한 번에 가져올 수 있습니다</p>
+    </div>
+
+    <!-- Stats bar -->
+    <div id="stats-bar" class="flex items-center gap-6 mb-6 text-sm text-gray-500"></div>
+
+    <!-- Progress indicator -->
+    <div id="progress-area" class="hidden mb-6">
+      <div class="flex justify-between text-xs text-gray-500 mb-1">
+        <span id="progress-label">처리 중…</span>
+        <span id="progress-pct">0%</span>
+      </div>
+      <div class="h-1 rounded-full overflow-hidden" style="background: rgba(255,255,255,0.08);">
+        <div id="progress-fill" class="progress-fill h-full rounded-full" style="width:0%; background: linear-gradient(to right, #7c3aed, #4f46e5);"></div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="flex flex-col items-center justify-center py-32 text-center">
+      <div class="text-7xl mb-6 animate-float">📚</div>
+      <h2 class="font-display text-2xl font-bold text-gray-400 mb-3 tracking-wide">라이브러리가 비어있습니다</h2>
+      <p class="text-gray-600 text-sm max-w-sm leading-relaxed mb-6">상단의 <strong class="text-arcane-400">PDF 추가</strong> 버튼을 클릭하거나<br />PDF 파일을 화면에 드래그하여 시작하세요</p>
+      <label class="cursor-pointer inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-medium text-white transition-all hover:scale-105 active:scale-95"
+        style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        첫 번째 시나리오 추가하기
+        <input type="file" accept=".pdf" multiple class="hidden" id="empty-file-input" />
+      </label>
+    </div>
+
+    <!-- Card grid -->
+    <div id="card-grid" class="grid gap-5" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); display: none;"></div>
+  </main>
+
+  <!-- ─── DETAIL PANEL ─── -->
+  <div id="detail-panel" class="hidden-panel fixed top-0 right-0 h-full w-full sm:w-96 z-50 border-l border-white/10 overflow-y-auto"
+    style="background: rgba(13,13,22,0.97); backdrop-filter: blur(20px);">
+    <div id="detail-content"></div>
+  </div>
+  <!-- Detail backdrop -->
+  <div id="detail-backdrop" class="hidden fixed inset-0 z-40 bg-black/40 modal-backdrop" onclick="closeDetail()"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ SETTINGS MODAL ══ -->
+<div id="settings-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/70 modal-backdrop" onclick="closeSettings()"></div>
+  <div class="relative w-full max-w-lg rounded-2xl border border-white/10 p-8 animate-slide-up z-10"
+    style="background: #111118;">
+    <h2 class="font-display text-xl font-bold text-white mb-6 tracking-wide">⚙️ 설정</h2>
+
+    <div class="space-y-6">
+      <!-- AI Provider -->
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-2 uppercase tracking-widest">AI 제공자</label>
+        <select id="ai-provider" class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all"
+          style="background: rgba(255,255,255,0.05);">
+          <option value="gemini">Google Gemini</option>
+          <option value="openai">OpenAI GPT</option>
+          <option value="claude">Anthropic Claude</option>
+        </select>
+      </div>
+
+      <!-- API Key -->
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-2 uppercase tracking-widest">API 키</label>
+        <div class="relative">
+          <input id="api-key-input" type="password" placeholder="API 키를 입력하세요…"
+            class="arcane-input w-full pl-3 pr-10 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all font-mono"
+            style="background: rgba(255,255,255,0.05);" />
+          <button id="toggle-key-vis" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300">
+            <svg id="eye-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <p class="text-xs text-gray-600 mt-2">키는 브라우저 로컬에만 저장되며 외부로 전송되지 않습니다.</p>
+      </div>
+
+      <!-- Model name for custom -->
+      <div id="model-row">
+        <label class="block text-xs font-mono text-arcane-400 mb-2 uppercase tracking-widest">모델명 (선택)</label>
+        <input id="model-input" type="text" placeholder="예: gemini-1.5-flash"
+          class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all font-mono"
+          style="background: rgba(255,255,255,0.05);" />
+      </div>
+    </div>
+
+    <div class="deco-line my-6"></div>
+
+    <!-- Danger zone -->
+    <div>
+      <label class="block text-xs font-mono text-crimson-400 mb-3 uppercase tracking-widest">위험 구역</label>
+      <button id="clear-db-btn" class="px-4 py-2 rounded-lg text-sm text-crimson-400 border border-crimson-500/30 hover:bg-crimson-500/10 transition-all">
+        🗑️ 전체 라이브러리 초기화
+      </button>
+    </div>
+
+    <div class="flex gap-3 mt-8">
+      <button onclick="closeSettings()" class="flex-1 py-2.5 rounded-lg text-sm text-gray-400 border border-white/10 hover:border-white/20 transition-all">취소</button>
+      <button id="save-settings-btn" class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90"
+        style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ EDIT MODAL ══ -->
+<div id="edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div class="absolute inset-0 bg-black/70 modal-backdrop" onclick="closeEditModal()"></div>
+  <div class="relative w-full max-w-lg rounded-2xl border border-white/10 p-8 animate-slide-up z-10 overflow-y-auto max-h-[90vh]"
+    style="background: #111118;">
+    <h2 class="font-display text-xl font-bold text-white mb-6 tracking-wide">✏️ 메타데이터 편집</h2>
+    <input type="hidden" id="edit-id" />
+
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-1.5 uppercase tracking-widest">제목</label>
+        <input id="edit-title" type="text" class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all"
+          style="background: rgba(255,255,255,0.05);" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-1.5 uppercase tracking-widest">룰 시스템</label>
+        <input id="edit-rule" type="text" placeholder="예: CoC7th, D&D5e, TRPG…"
+          class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all"
+          style="background: rgba(255,255,255,0.05);" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-1.5 uppercase tracking-widest">라이터 (저자)</label>
+        <input id="edit-author" type="text" class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all"
+          style="background: rgba(255,255,255,0.05);" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-1.5 uppercase tracking-widest">플레이 인원</label>
+        <input id="edit-players" type="text" placeholder="예: 2~4인"
+          class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all"
+          style="background: rgba(255,255,255,0.05);" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-1.5 uppercase tracking-widest">태그 (쉼표로 구분)</label>
+        <input id="edit-tags" type="text" placeholder="예: #공포, #추리, #전투중심"
+          class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all"
+          style="background: rgba(255,255,255,0.05);" />
+      </div>
+      <div>
+        <label class="block text-xs font-mono text-arcane-400 mb-1.5 uppercase tracking-widest">줄거리 요약</label>
+        <textarea id="edit-summary" rows="4" class="arcane-input w-full px-3 py-2.5 rounded-lg text-sm text-white border border-white/10 transition-all resize-none"
+          style="background: rgba(255,255,255,0.05);"></textarea>
+      </div>
+    </div>
+
+    <div class="flex gap-3 mt-6">
+      <button onclick="closeEditModal()" class="flex-1 py-2.5 rounded-lg text-sm text-gray-400 border border-white/10 hover:border-white/20 transition-all">취소</button>
+      <button id="save-edit-btn" class="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-all hover:opacity-90"
+        style="background: linear-gradient(135deg, #7c3aed, #4f46e5);">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ TOAST ══ -->
+<div id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════════════ SCRIPTS ══ -->
+<script>
+// ─────────────────────────────────────────────────────────────
+// PDF.js worker setup
+pdfjsLib.GlobalWorkerOptions.workerSrc =
+  'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+// ─────────────────────────────────────────────────────────────
+// IndexedDB
+const DB_NAME = 'arcane-shelf-v2';
+const DB_VERSION = 1;
+const STORE = 'scenarios';
+let db = null;
+
+async function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const d = e.target.result;
+      if (!d.objectStoreNames.contains(STORE)) {
+        const s = d.createObjectStore(STORE, { keyPath: 'id' });
+        s.createIndex('rule', 'rule', { unique: false });
+        s.createIndex('author', 'author', { unique: false });
+        s.createIndex('title', 'title', { unique: false });
+      }
+    };
+    req.onsuccess = (e) => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbGetAll() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readonly');
+    const req = tx.objectStore(STORE).getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbPut(item) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).put(item);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbDelete(id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function dbClear() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    const req = tx.objectStore(STORE).clear();
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// App State
+let scenarios = [];
+let filterState = { search: '', rule: '', author: '', tags: [] };
+let settings = { provider: 'gemini', apiKey: '', model: '' };
+
+function loadSettings() {
+  const s = localStorage.getItem('arcane-settings');
+  if (s) { try { settings = JSON.parse(s); } catch(e){} }
+}
+function saveSettingsToStorage() {
+  localStorage.setItem('arcane-settings', JSON.stringify(settings));
+}
+
+// ─────────────────────────────────────────────────────────────
+// Toast
+function showToast(msg, type = 'info', dur = 3500) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+  t.className = `toast toast-${type}`;
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  c.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, dur);
+}
+
+// ─────────────────────────────────────────────────────────────
+// Progress
+function setProgress(pct, label) {
+  const area = document.getElementById('progress-area');
+  const fill = document.getElementById('progress-fill');
+  const lbl = document.getElementById('progress-label');
+  const pctEl = document.getElementById('progress-pct');
+  if (pct === null) { area.classList.add('hidden'); return; }
+  area.classList.remove('hidden');
+  fill.style.width = pct + '%';
+  if (label) lbl.textContent = label;
+  pctEl.textContent = Math.round(pct) + '%';
+}
+
+// ─────────────────────────────────────────────────────────────
+// PDF Processing
+async function processPDFFile(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  // Render first page as thumbnail
+  const page = await pdf.getPage(1);
+  const viewport = page.getViewport({ scale: 0.7 });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  const thumbnail = canvas.toDataURL('image/jpeg', 0.75);
+
+  // Extract text from first 3 pages
+  let extractedText = '';
+  const maxPages = Math.min(pdf.numPages, 3);
+  for (let i = 1; i <= maxPages; i++) {
+    const pg = await pdf.getPage(i);
+    const content = await pg.getTextContent();
+    extractedText += content.items.map(item => item.str).join(' ') + '\n';
+  }
+
+  return {
+    thumbnail,
+    extractedText: extractedText.trim().slice(0, 4000),
+    pageCount: pdf.numPages,
+  };
+}
+
+async function handleFiles(files) {
+  if (!files || files.length === 0) return;
+  const pdfFiles = Array.from(files).filter(f => f.type === 'application/pdf' || f.name.endsWith('.pdf'));
+  if (pdfFiles.length === 0) { showToast('PDF 파일만 가져올 수 있습니다', 'error'); return; }
+
+  document.getElementById('drop-zone').classList.add('hidden');
+  setProgress(0, `0 / ${pdfFiles.length} 파일 처리 중…`);
+
+  for (let i = 0; i < pdfFiles.length; i++) {
+    const file = pdfFiles[i];
+    const id = `pdf-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setProgress((i / pdfFiles.length) * 100, `(${i+1}/${pdfFiles.length}) ${file.name}`);
+
+    try {
+      const { thumbnail, extractedText, pageCount } = await processPDFFile(file);
+      const scenario = {
+        id,
+        title: file.name.replace(/\.pdf$/i, ''),
+        filename: file.name,
+        rule: '',
+        author: '',
+        players: '',
+        tags: [],
+        summary: '',
+        thumbnail,
+        extractedText,
+        pageCount,
+        pdfData: await fileToBase64(file),
+        addedAt: Date.now(),
+      };
+      await dbPut(scenario);
+      scenarios.unshift(scenario);
+    } catch (err) {
+      showToast(`${file.name} 처리 실패: ${err.message}`, 'error');
+    }
+  }
+
+  setProgress(100, '완료!');
+  setTimeout(() => setProgress(null), 1500);
+  renderGrid();
+  renderSidebar();
+  showToast(`${pdfFiles.length}개 파일을 가져왔습니다`, 'success');
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// AI Summarization
+async function aiSummarize(scenarioId) {
+  if (!settings.apiKey) {
+    showToast('설정에서 AI API 키를 먼저 입력해주세요', 'error');
+    openSettings();
+    return;
+  }
+
+  const sc = scenarios.find(s => s.id === scenarioId);
+  if (!sc) return;
+
+  if (!sc.extractedText || sc.extractedText.length < 100) {
+    showToast('텍스트를 추출할 수 없습니다 (스캔 PDF일 수 있음)', 'error');
+    return;
+  }
+
+  showToast('AI 분석 중…', 'info', 8000);
+
+  const prompt = `당신은 TRPG 시나리오 분석 전문가입니다. 다음 텍스트는 TRPG 시나리오 PDF의 앞부분입니다.
+
+---
+${sc.extractedText.slice(0, 3000)}
+---
+
+다음 형식으로만 답하세요 (JSON):
+{
+  "summary": "시나리오 줄거리를 3줄로 요약 (한국어)",
+  "tags": ["#태그1", "#태그2", "#태그3", "#태그4", "#태그5"]
+}
+
+태그 예시: #공포, #추리, #전투중심, #사회극, #탐정물, #소규모, #대규모, #호러, #판타지, #근현대, #SF, #미스터리
+
+반드시 JSON만 출력하세요.`;
+
+  try {
+    let result;
+    if (settings.provider === 'gemini') {
+      result = await callGemini(prompt);
+    } else if (settings.provider === 'openai') {
+      result = await callOpenAI(prompt);
+    } else {
+      result = await callClaude(prompt);
+    }
+
+    // Parse JSON response
+    const clean = result.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    sc.summary = parsed.summary || '';
+    sc.tags = parsed.tags || [];
+    await dbPut(sc);
+
+    renderGrid();
+    renderSidebar();
+    showToast('AI 요약 완료!', 'success');
+
+    // Refresh detail panel if open
+    const panel = document.getElementById('detail-panel');
+    if (!panel.classList.contains('hidden-panel')) {
+      const currentId = panel.dataset.scenarioId;
+      if (currentId === scenarioId) openDetail(scenarioId);
+    }
+  } catch (err) {
+    showToast(`AI 오류: ${err.message}`, 'error');
+  }
+}
+
+async function callGemini(prompt) {
+  const model = settings.model || 'gemini-1.5-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.apiKey}`;
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+  });
+  if (!res.ok) throw new Error(`Gemini API 오류 (${res.status})`);
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+async function callOpenAI(prompt) {
+  const model = settings.model || 'gpt-4o-mini';
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${settings.apiKey}` },
+    body: JSON.stringify({ model, messages: [{ role: 'user', content: prompt }], max_tokens: 500 }),
+  });
+  if (!res.ok) throw new Error(`OpenAI API 오류 (${res.status})`);
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+async function callClaude(prompt) {
+  const model = settings.model || 'claude-haiku-4-5-20251001';
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': settings.apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({ model, max_tokens: 500, messages: [{ role: 'user', content: prompt }] }),
+  });
+  if (!res.ok) throw new Error(`Claude API 오류 (${res.status})`);
+  const data = await res.json();
+  return data.content?.[0]?.text || '';
+}
+
+// ─────────────────────────────────────────────────────────────
+// Filtering
+function getFilteredScenarios() {
+  let list = [...scenarios];
+  const q = filterState.search.toLowerCase();
+  if (q) {
+    list = list.filter(s =>
+      s.title.toLowerCase().includes(q) ||
+      (s.author || '').toLowerCase().includes(q) ||
+      (s.rule || '').toLowerCase().includes(q) ||
+      (s.summary || '').toLowerCase().includes(q)
+    );
+  }
+  if (filterState.rule) list = list.filter(s => s.rule === filterState.rule);
+  if (filterState.author) list = list.filter(s => s.author === filterState.author);
+  if (filterState.tags.length > 0) {
+    list = list.filter(s => filterState.tags.every(t => (s.tags || []).includes(t)));
+  }
+  return list;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Render: Grid
+function renderGrid() {
+  const grid = document.getElementById('card-grid');
+  const empty = document.getElementById('empty-state');
+  const statsBar = document.getElementById('stats-bar');
+  const filtered = getFilteredScenarios();
+
+  if (scenarios.length === 0) {
+    grid.style.display = 'none';
+    empty.classList.remove('hidden');
+    statsBar.innerHTML = '';
+    return;
+  }
+
+  empty.classList.add('hidden');
+  grid.style.display = 'grid';
+
+  // Stats
+  const allTags = [...new Set(scenarios.flatMap(s => s.tags || []))];
+  statsBar.innerHTML = `
+    <span class="text-arcane-400 font-medium">${filtered.length}</span><span>/ ${scenarios.length} 시나리오</span>
+    <span class="text-gray-700">|</span>
+    <span>${[...new Set(scenarios.map(s=>s.rule).filter(Boolean))].length} 룰 시스템</span>
+    <span class="text-gray-700">|</span>
+    <span>${allTags.length} 태그</span>
+  `;
+
+  grid.innerHTML = '';
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="col-span-full py-16 text-center text-gray-500">검색 결과가 없습니다</div>`;
+    return;
+  }
+
+  filtered.forEach(sc => {
+    const card = document.createElement('div');
+    card.className = 'scenario-card rounded-xl overflow-hidden cursor-pointer border border-white/5 animate-fade-in';
+    card.style.background = 'rgba(22,22,34,0.8)';
+
+    const thumbHtml = sc.thumbnail
+      ? `<img src="${sc.thumbnail}" alt="${escHtml(sc.title)}" style="width:100%;height:100%;object-fit:cover;" loading="lazy"/>`
+      : `<div class="no-thumb" style="height:100%;">📜</div>`;
+
+    const tagsHtml = (sc.tags || []).slice(0, 3).map(t =>
+      `<span class="tag-pill px-1.5 py-0.5 rounded text-xs" style="background:rgba(139,92,246,0.2);color:#a78bfa;">${escHtml(t)}</span>`
+    ).join('');
+
+    const hasAI = sc.summary ? '✨' : '';
+
+    card.innerHTML = `
+      <div class="thumb-container" style="aspect-ratio:2/3; position:relative;">
+        ${thumbHtml}
+        <!-- Overlay gradient -->
+        <div style="position:absolute;inset:0;background:linear-gradient(to top, rgba(10,10,15,0.95) 0%, rgba(10,10,15,0.2) 50%, transparent 100%);"></div>
+        <!-- AI badge -->
+        ${hasAI ? `<div style="position:absolute;top:8px;right:8px;background:rgba(139,92,246,0.9);border-radius:6px;padding:2px 6px;font-size:0.65rem;color:white;font-weight:600;">AI요약</div>` : ''}
+        <!-- Page count -->
+        <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.6);border-radius:4px;padding:2px 6px;font-size:0.65rem;color:#9ca3af;font-family:monospace;">${sc.pageCount || '?'}p</div>
+        <!-- Bottom info -->
+        <div style="position:absolute;bottom:0;left:0;right:0;padding:10px;">
+          <div class="font-display text-white text-sm font-semibold leading-tight mb-1.5" style="overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;">${escHtml(sc.title)}</div>
+          ${sc.rule ? `<div class="text-xs text-arcane-400 mb-1.5 font-mono">${escHtml(sc.rule)}</div>` : ''}
+          <div class="flex flex-wrap gap-1">${tagsHtml}</div>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', () => openDetail(sc.id));
+    grid.appendChild(card);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Render: Sidebar
+function renderSidebar() {
+  const rules = [...new Set(scenarios.map(s => s.rule).filter(Boolean))].sort();
+  const authors = [...new Set(scenarios.map(s => s.author).filter(Boolean))].sort();
+  const allTags = [...new Set(scenarios.flatMap(s => s.tags || []))].sort();
+
+  const sectionHTML = (title, items, type) => {
+    if (items.length === 0) return '';
+    return `
+      <div class="mb-6">
+        <p class="text-xs font-mono text-gray-600 uppercase tracking-widest mb-2">${title}</p>
+        <div class="space-y-0.5">
+          ${items.map(item => {
+            const isActive = type === 'tag'
+              ? filterState.tags.includes(item)
+              : filterState[type] === item;
+            return `<button onclick="toggleFilter('${type}','${escHtml(item).replace(/'/g,"\\'")}' )"
+              class="w-full text-left px-2.5 py-1.5 rounded-lg text-sm transition-all ${isActive
+                ? 'text-arcane-400 font-medium'
+                : 'text-gray-400 hover:text-gray-200'}"
+              style="${isActive ? 'background:rgba(139,92,246,0.15);' : ''}"
+            >${type === 'tag' ? '' : ''}${escHtml(item)}</button>`;
+          }).join('')}
+        </div>
+      </div>`;
+  };
+
+  document.getElementById('sidebar-content').innerHTML = `
+    <div class="font-display text-xs text-gray-600 uppercase tracking-widest mb-4">필터</div>
+    ${filterState.rule || filterState.author || filterState.tags.length > 0 ? `
+      <button onclick="clearFilters()" class="mb-4 text-xs text-crimson-400 hover:text-crimson-300">✕ 필터 초기화</button>
+    ` : ''}
+    ${sectionHTML('룰 시스템', rules, 'rule')}
+    ${sectionHTML('라이터', authors, 'author')}
+    ${sectionHTML('태그', allTags, 'tag')}
+    ${rules.length === 0 && authors.length === 0 && allTags.length === 0
+      ? '<p class="text-xs text-gray-600">시나리오를 추가하면 필터가 생성됩니다</p>'
+      : ''}
+  `;
+}
+
+function toggleFilter(type, value) {
+  if (type === 'tag') {
+    const idx = filterState.tags.indexOf(value);
+    if (idx >= 0) filterState.tags.splice(idx, 1);
+    else filterState.tags.push(value);
+  } else {
+    filterState[type] = filterState[type] === value ? '' : value;
+  }
+  renderGrid();
+  renderSidebar();
+}
+
+function clearFilters() {
+  filterState = { ...filterState, rule: '', author: '', tags: [] };
+  renderGrid();
+  renderSidebar();
+}
+
+// ─────────────────────────────────────────────────────────────
+// Detail Panel
+function openDetail(id) {
+  const sc = scenarios.find(s => s.id === id);
+  if (!sc) return;
+
+  const panel = document.getElementById('detail-panel');
+  const backdrop = document.getElementById('detail-backdrop');
+  panel.dataset.scenarioId = id;
+
+  const tagsHtml = (sc.tags || []).map(t =>
+    `<span class="tag-pill px-2 py-1 rounded-md text-xs inline-block" style="background:rgba(139,92,246,0.2);color:#a78bfa;">${escHtml(t)}</span>`
+  ).join('');
+
+  const metaRow = (icon, label, val) => val
+    ? `<div class="flex gap-3 items-start"><span class="text-gray-600 w-4 mt-0.5 shrink-0">${icon}</span><div><div class="text-xs text-gray-600 mb-0.5">${label}</div><div class="text-sm text-gray-200">${escHtml(val)}</div></div></div>`
+    : '';
+
+  panel.querySelector('#detail-content') && (panel.querySelector('#detail-content').remove());
+  const content = document.createElement('div');
+  content.id = 'detail-content';
+  content.innerHTML = `
+    <!-- Thumbnail header -->
+    <div style="position:relative;height:260px;overflow:hidden;">
+      ${sc.thumbnail
+        ? `<img src="${sc.thumbnail}" style="width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(0.4);" />`
+        : `<div style="height:100%;background:linear-gradient(135deg,#1a1a30,#0f0f1e);"></div>`}
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent 30%, #0d0d16 100%);"></div>
+      <!-- Close button -->
+      <button onclick="closeDetail()" style="position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:8px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.1);color:#9ca3af;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;">✕</button>
+      <!-- Thumb centered -->
+      ${sc.thumbnail
+        ? `<img src="${sc.thumbnail}" style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);height:200px;width:auto;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,0.8);border:1px solid rgba(255,255,255,0.1);" />`
+        : `<div style="position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);height:200px;width:140px;border-radius:8px;background:linear-gradient(135deg,#1a1a30,#0f0f1e);display:flex;align-items:center;justify-content:center;font-size:3rem;">📜</div>`}
+    </div>
+
+    <!-- Content -->
+    <div style="padding:40px 24px 24px;">
+      <h2 class="font-display text-xl font-bold text-white mb-1 leading-tight">${escHtml(sc.title)}</h2>
+      <p class="text-xs text-gray-600 font-mono mb-4">${sc.pageCount ? sc.pageCount + ' pages' : ''} · ${new Date(sc.addedAt).toLocaleDateString('ko-KR')}</p>
+
+      <!-- Tags -->
+      ${tagsHtml ? `<div class="flex flex-wrap gap-1.5 mb-5">${tagsHtml}</div>` : ''}
+
+      <!-- Meta -->
+      <div class="space-y-3 mb-6">
+        ${metaRow('📖', '룰 시스템', sc.rule)}
+        ${metaRow('✍️', '라이터', sc.author)}
+        ${metaRow('👥', '플레이 인원', sc.players)}
+      </div>
+
+      <!-- Summary -->
+      ${sc.summary ? `
+        <div class="mb-6 p-4 rounded-xl border border-arcane-500/20" style="background:rgba(139,92,246,0.05);">
+          <div class="text-xs font-mono text-arcane-400 mb-2 uppercase tracking-widest">✨ AI 줄거리 요약</div>
+          <p class="text-sm text-gray-300 leading-relaxed">${escHtml(sc.summary)}</p>
+        </div>
+      ` : ''}
+
+      <div class="deco-line mb-5"></div>
+
+      <!-- Action buttons -->
+      <div class="space-y-2.5">
+        <button onclick="openPDF('${id}')"
+          class="w-full py-3 rounded-xl text-sm font-medium text-white flex items-center justify-center gap-2 transition-all hover:opacity-90"
+          style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
+          📄 PDF 읽기
+        </button>
+        <button onclick="aiSummarize('${id}')"
+          class="w-full py-2.5 rounded-xl text-sm font-medium text-arcane-400 flex items-center justify-center gap-2 transition-all border border-arcane-500/30 hover:bg-arcane-500/10">
+          ✨ AI 요약 생성
+        </button>
+        <button onclick="openEditModal('${id}')"
+          class="w-full py-2.5 rounded-xl text-sm text-gray-400 flex items-center justify-center gap-2 transition-all border border-white/10 hover:border-white/20">
+          ✏️ 메타데이터 편집
+        </button>
+        <button onclick="deleteScenario('${id}')"
+          class="w-full py-2.5 rounded-xl text-sm text-crimson-400 flex items-center justify-center gap-2 transition-all border border-crimson-500/20 hover:bg-crimson-500/10">
+          🗑️ 삭제
+        </button>
+      </div>
+    </div>
+  `;
+  panel.appendChild(content);
+  panel.classList.remove('hidden-panel');
+  backdrop.classList.remove('hidden');
+}
+
+function closeDetail() {
+  const panel = document.getElementById('detail-panel');
+  const backdrop = document.getElementById('detail-backdrop');
+  panel.classList.add('hidden-panel');
+  backdrop.classList.add('hidden');
+}
+
+function openPDF(id) {
+  const sc = scenarios.find(s => s.id === id);
+  if (!sc || !sc.pdfData) { showToast('PDF 데이터를 찾을 수 없습니다', 'error'); return; }
+  const win = window.open();
+  win.document.write(`<iframe src="${sc.pdfData}" width="100%" height="100%" style="border:none;position:fixed;inset:0;"></iframe>`);
+}
+
+async function deleteScenario(id) {
+  if (!confirm('이 시나리오를 삭제하시겠습니까?')) return;
+  await dbDelete(id);
+  scenarios = scenarios.filter(s => s.id !== id);
+  closeDetail();
+  renderGrid();
+  renderSidebar();
+  showToast('삭제되었습니다', 'success');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Edit Modal
+function openEditModal(id) {
+  const sc = scenarios.find(s => s.id === id);
+  if (!sc) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('edit-title').value = sc.title || '';
+  document.getElementById('edit-rule').value = sc.rule || '';
+  document.getElementById('edit-author').value = sc.author || '';
+  document.getElementById('edit-players').value = sc.players || '';
+  document.getElementById('edit-tags').value = (sc.tags || []).join(', ');
+  document.getElementById('edit-summary').value = sc.summary || '';
+  document.getElementById('edit-modal').classList.remove('hidden');
+}
+function closeEditModal() { document.getElementById('edit-modal').classList.add('hidden'); }
+
+async function saveEdit() {
+  const id = document.getElementById('edit-id').value;
+  const sc = scenarios.find(s => s.id === id);
+  if (!sc) return;
+  sc.title = document.getElementById('edit-title').value.trim();
+  sc.rule = document.getElementById('edit-rule').value.trim();
+  sc.author = document.getElementById('edit-author').value.trim();
+  sc.players = document.getElementById('edit-players').value.trim();
+  sc.tags = document.getElementById('edit-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  sc.summary = document.getElementById('edit-summary').value.trim();
+  await dbPut(sc);
+  closeEditModal();
+  renderGrid();
+  renderSidebar();
+  if (!document.getElementById('detail-panel').classList.contains('hidden-panel')) {
+    openDetail(id);
+  }
+  showToast('저장되었습니다', 'success');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Settings Modal
+function openSettings() {
+  document.getElementById('api-key-input').value = settings.apiKey || '';
+  document.getElementById('ai-provider').value = settings.provider || 'gemini';
+  document.getElementById('model-input').value = settings.model || '';
+  document.getElementById('settings-modal').classList.remove('hidden');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.add('hidden'); }
+
+function saveSettings() {
+  settings.provider = document.getElementById('ai-provider').value;
+  settings.apiKey = document.getElementById('api-key-input').value.trim();
+  settings.model = document.getElementById('model-input').value.trim();
+  saveSettingsToStorage();
+  closeSettings();
+  showToast('설정이 저장되었습니다', 'success');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Drop Zone
+function setupDropZone() {
+  const zone = document.getElementById('drop-zone');
+  const body = document.body;
+
+  let dragCount = 0;
+  body.addEventListener('dragenter', (e) => {
+    e.preventDefault();
+    dragCount++;
+    zone.classList.remove('hidden');
+    zone.classList.add('drop-zone-active');
+  });
+  body.addEventListener('dragleave', () => {
+    dragCount--;
+    if (dragCount <= 0) {
+      dragCount = 0;
+      zone.classList.remove('drop-zone-active');
+      if (scenarios.length > 0) zone.classList.add('hidden');
+    }
+  });
+  body.addEventListener('dragover', (e) => e.preventDefault());
+  body.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dragCount = 0;
+    zone.classList.remove('drop-zone-active');
+    if (scenarios.length > 0) zone.classList.add('hidden');
+    handleFiles(e.dataTransfer.files);
+  });
+}
+
+// ─────────────────────────────────────────────────────────────
+// Sidebar Toggle
+let sidebarVisible = true;
+document.getElementById('filter-toggle').addEventListener('click', () => {
+  const sb = document.getElementById('sidebar');
+  if (window.innerWidth >= 1024) {
+    sb.style.display = sidebarVisible ? 'none' : 'block';
+    sidebarVisible = !sidebarVisible;
+  }
+});
+
+// ─────────────────────────────────────────────────────────────
+// Utility
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// ─────────────────────────────────────────────────────────────
+// Event Listeners
+document.getElementById('file-input').addEventListener('change', (e) => handleFiles(e.target.files));
+document.getElementById('empty-file-input').addEventListener('change', (e) => handleFiles(e.target.files));
+
+document.getElementById('search-input').addEventListener('input', (e) => {
+  filterState.search = e.target.value;
+  renderGrid();
+});
+
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('save-settings-btn').addEventListener('click', saveSettings);
+document.getElementById('save-edit-btn').addEventListener('click', saveEdit);
+
+document.getElementById('toggle-key-vis').addEventListener('click', () => {
+  const inp = document.getElementById('api-key-input');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+});
+
+document.getElementById('clear-db-btn').addEventListener('click', async () => {
+  if (!confirm('모든 시나리오를 삭제합니다. 이 작업은 되돌릴 수 없습니다.')) return;
+  await dbClear();
+  scenarios = [];
+  closeSettings();
+  renderGrid();
+  renderSidebar();
+  showToast('라이브러리가 초기화되었습니다', 'success');
+});
+
+// ─────────────────────────────────────────────────────────────
+// INIT
+async function init() {
+  db = await openDB();
+  scenarios = await dbGetAll();
+  scenarios.sort((a, b) => b.addedAt - a.addedAt);
+  loadSettings();
+  setupDropZone();
+  renderGrid();
+  renderSidebar();
+}
+
+init().catch(err => {
+  console.error('초기화 실패:', err);
+  showToast('앱 초기화 실패: ' + err.message, 'error');
+});
+</script>
+</body>
+</html>
