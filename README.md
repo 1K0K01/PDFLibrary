@@ -31,29 +31,6 @@
 
 ---
 
-## ⚙️ AI API 설정
-
-앱 우측 상단 ⚙️ 설정 버튼에서 입력:
-
-### Google Gemini 
-1. [Google AI Studio](https://aistudio.google.com/app/apikey) → `Get API Key`
-2. 설정 창에서 제공자: `Google Gemini` 선택
-3. API 키 입력 → 저장
-- 기본 모델: `gemini-1.5-flash` (무료, 빠름)
-
-### OpenAI GPT
-1. [platform.openai.com](https://platform.openai.com/api-keys) → API Key 발급
-2. 제공자: `OpenAI GPT` 선택
-- 기본 모델: `gpt-4o-mini` (저렴)
-
-### Anthropic Claude
-1. [console.anthropic.com](https://console.anthropic.com/) → API Key 발급
-2. 제공자: `Anthropic Claude` 선택
-- 기본 모델: `claude-haiku-4-5-20251001`
-
-> 🔒 **API 키는 브라우저 localStorage에만 저장되며, 어떤 서버로도 전송되지 않습니다.**
-
----
 
 ## 💾 데이터 저장 구조 (IndexedDB)
 
