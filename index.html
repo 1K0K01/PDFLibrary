@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ARCANE SHELF V3.1 — 고급 AI 라이브러리</title>
+  <title>ARCANE SHELF V3.2 — 시나리오 라이브러리</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -45,7 +45,7 @@
       <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20">
         <span class="font-display font-black text-white text-xl">A</span>
       </div>
-      <h1 class="font-display font-bold text-2xl tracking-tighter text-white">ARCANE <span class="text-purple-500">SHELF</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.1</span></h1>
+      <h1 class="font-display font-bold text-2xl tracking-tighter text-white">ARCANE <span class="text-purple-500">SHELF</span> <span class="text-[10px] bg-white/10 px-2 py-0.5 rounded ml-2">V3.2</span></h1>
     </div>
     <div class="flex items-center gap-6">
       <input type="text" id="search-input" placeholder="아카이브 검색..." class="bg-obsidian-700 border border-white/5 rounded-full py-2 px-6 focus:outline-none focus:border-purple-500 w-72 text-sm transition-all" />
@@ -61,7 +61,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
         시나리오 입고
       </label>
-      <input type="file" id="file-input" class="hidden" multiple accept="application/pdf" />
+      <input type="file" id="file-input" class="hidden" multiple accept=".pdf" />
       <div id="filter-container" class="space-y-8"></div>
     </aside>
 
@@ -124,7 +124,9 @@
   <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 px-8 py-4 rounded-2xl bg-white text-black font-bold shadow-2xl z-[100] transition-all opacity-0 pointer-events-none scale-90"></div>
 
   <script>
+    // PDF.js 워커 설정
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
     let db, scenarios = [], currentEditId = null;
     const DB_NAME = 'arcane-shelf-v3';
 
@@ -150,30 +152,27 @@
 
     async function handleFiles(files) {
       if (!files || files.length === 0) return;
-      showToast(`${files.length}개의 고서를 입고 중...`);
+      showToast(`${files.length}개의 고서를 확인 중...`);
 
       for (const file of Array.from(files)) {
-        if (file.type !== 'application/pdf') {
-          showToast(`PDF 파일이 아닙니다: ${file.name}`, 'error');
-          continue;
-        }
-
         try {
           const arrayBuffer = await file.arrayBuffer();
           const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
           const page = await pdf.getPage(1);
+          
           const viewport = page.getViewport({ scale: 0.8 });
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           canvas.height = viewport.height; canvas.width = viewport.width;
           await page.render({ canvasContext: ctx, viewport }).promise;
 
+          const base64PDF = await fileToBase64(file);
           const scenario = {
             id: crypto.randomUUID(),
             title: file.name.replace('.pdf', ''),
-            rule: 'Unknown System', author: '', players: '', tags: [], summary: '',
+            rule: 'Unknown', author: '', players: '', tags: [], summary: '',
             thumbnail: canvas.toDataURL('image/jpeg', 0.7),
-            pdfData: await fileToBase64(file),
+            pdfData: base64PDF,
             addedAt: Date.now()
           };
 
@@ -182,74 +181,27 @@
           renderGrid();
         } catch (e) {
           console.error(e);
-          showToast(`파일 처리 중 오류: ${file.name}`, 'error');
+          showToast(`입고 실패: ${file.name}`, 'error');
         }
       }
       showToast('입고가 완료되었습니다.', 'success');
-      document.getElementById('file-input').value = ""; // Reset input
+      document.getElementById('file-input').value = "";
     }
 
     function fileToBase64(file) {
-      return new Promise((resolve, reject) => {
+      return new Promise((r, j) => {
         const reader = new FileReader();
+        reader.onload = () => r(reader.result);
+        reader.onerror = e => j(e);
         reader.readAsDataURL(file);
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = error => reject(error);
       });
-    }
-
-    async function generateAISummary(id) {
-      const config = {
-        key: localStorage.getItem('arcane_key'),
-        provider: localStorage.getItem('arcane_provider') || 'gemini',
-        model: localStorage.getItem('arcane_model') || 'gemini-1.5-pro',
-        prompt: localStorage.getItem('arcane_prompt') || '이 TRPG 시나리오를 요약해줘.',
-        length: localStorage.getItem('arcane_length') || 500
-      };
-
-      if (!config.key) { showToast('API 키를 먼저 설정하세요.', 'error'); return openSettings(); }
-      const sc = scenarios.find(s => s.id === id);
-      showToast('텍스트 추출 중...');
-
-      try {
-        const resp = await fetch(sc.pdfData);
-        const blob = await resp.blob();
-        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()) }).promise;
-        let fullText = "";
-        const maxPages = Math.min(pdf.numPages, 20); // 성능 위해 상위 20페이지만 분석
-        for (let i = 1; i <= maxPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          fullText += textContent.items.map(it => it.str).join(' ') + "\n";
-        }
-
-        showToast('AI 분석 중...');
-        let result = "";
-        const prompt = `${config.prompt}\n결과 길이는 약 ${config.length}자.\n내용:\n${fullText.slice(0, 20000)}`;
-
-        if (config.provider === 'gemini') {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.key}`, {
-            method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
-          });
-          const d = await res.json();
-          result = d.candidates[0].content.parts[0].text;
-        } else {
-          const res = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST', headers: { 'Authorization': `Bearer ${config.key}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ model: config.model, messages: [{ role: 'user', content: prompt }] })
-          });
-          const d = await res.json();
-          result = d.choices[0].message.content;
-        }
-        document.getElementById('edit-summary').value = result;
-        showToast('분석 완료!', 'success');
-      } catch (e) { showToast('AI 분석 실패', 'error'); }
     }
 
     function renderGrid() {
       const grid = document.getElementById('scenario-grid');
       const term = document.getElementById('search-input').value.toLowerCase();
       const filtered = scenarios.filter(s => s.title.toLowerCase().includes(term));
+      
       grid.innerHTML = filtered.map(s => `
         <div class="shelf-card group cursor-pointer" onclick="openEdit('${s.id}')">
           <div class="relative aspect-[3/4] overflow-hidden rounded-2xl bg-obsidian-700">
@@ -273,12 +225,69 @@
       document.getElementById('edit-players').value = s.players;
       document.getElementById('edit-tags').value = s.tags.join(', ');
       document.getElementById('edit-summary').value = s.summary;
+      
       document.getElementById('ai-btn').onclick = () => generateAISummary(id);
       document.getElementById('open-pdf-btn').onclick = () => {
-          const win = window.open();
-          win.document.write('<iframe src="' + s.pdfData + '" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>');
+          const blob = dataURLtoBlob(s.pdfData);
+          const url = URL.createObjectURL(blob);
+          window.open(url, '_blank');
       };
       document.getElementById('edit-modal').classList.remove('hidden');
+    }
+
+    function dataURLtoBlob(dataurl) {
+        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while(n--) u8arr[n] = bstr.charCodeAt(n);
+        return new Blob([u8arr], {type:mime});
+    }
+
+    async function generateAISummary(id) {
+      const config = {
+        key: localStorage.getItem('arcane_key'),
+        provider: localStorage.getItem('arcane_provider') || 'gemini',
+        model: localStorage.getItem('arcane_model') || 'gemini-1.5-pro',
+        prompt: localStorage.getItem('arcane_prompt') || '이 TRPG 시나리오의 줄거리를 분석하고 요약해줘.',
+        length: localStorage.getItem('arcane_length') || 500
+      };
+
+      if (!config.key) { showToast('설정에서 API 키를 입력해주세요.', 'error'); return openSettings(); }
+      const sc = scenarios.find(s => s.id === id);
+      showToast('고서의 문자를 추출하는 중...');
+
+      try {
+        const blob = dataURLtoBlob(sc.pdfData);
+        const arrayBuffer = await blob.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
+        let fullText = "";
+        const maxPages = Math.min(pdf.numPages, 15);
+        for (let i = 1; i <= maxPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          fullText += textContent.items.map(it => it.str).join(' ') + "\n";
+        }
+
+        showToast('AI가 고서를 읽고 있습니다...');
+        const prompt = `${config.prompt}\n약 ${config.length}자 정도로 요약해줘.\n내용:\n${fullText.slice(0, 15000)}`;
+
+        let result = "";
+        if (config.provider === 'gemini') {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.model}:generateContent?key=${config.key}`, {
+            method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          });
+          const d = await res.json();
+          result = d.candidates[0].content.parts[0].text;
+        } else {
+          const res = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST', headers: { 'Authorization': `Bearer ${config.key}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model: config.model, messages: [{ role: 'user', content: prompt }] })
+          });
+          const d = await res.json();
+          result = d.choices[0].message.content;
+        }
+        document.getElementById('edit-summary').value = result;
+        showToast('분석이 완료되었습니다!', 'success');
+      } catch (e) { showToast('분석 실패. API 키나 모델명을 확인하세요.', 'error'); }
     }
 
     function closeEdit() { document.getElementById('edit-modal').classList.add('hidden'); }
@@ -291,7 +300,7 @@
       scenarios[idx].summary = document.getElementById('edit-summary').value;
       await dbSave(scenarios[idx]);
       renderGrid(); closeEdit();
-      showToast('저장되었습니다.');
+      showToast('아카이브가 갱신되었습니다.');
     }
 
     function openSettings() {
@@ -310,7 +319,7 @@
       localStorage.setItem('arcane_model', document.getElementById('api-model').value);
       localStorage.setItem('arcane_prompt', document.getElementById('api-prompt').value);
       localStorage.setItem('arcane_length', document.getElementById('api-length').value);
-      closeSettings(); showToast('설정이 저장되었습니다.', 'success');
+      closeSettings(); showToast('마법 설정이 저장되었습니다.', 'success');
     }
 
     function showToast(msg, type = 'info') {
