@@ -19,47 +19,6 @@
 
 ---
 
-## 🚀 GitHub Pages 배포 방법 (단계별)
-
-### 방법 A — GitHub 웹에서 바로 업로드 (초보자 추천)
-
-1. **GitHub 계정**이 없다면 [github.com](https://github.com)에서 무료 가입
-
-2. **새 저장소 만들기**
-   - 우측 상단 `+` → `New repository`
-   - Repository name: `trpg-library` (또는 원하는 이름)
-   - **Public** 선택 (GitHub Pages 무료 사용 조건)
-   - `Add a README file` 체크 → `Create repository`
-
-3. **파일 업로드**
-   - 저장소 메인 페이지에서 `Add file` → `Upload files`
-   - `index.html` 파일을 드래그하여 업로드
-   - `Commit changes` 클릭
-
-4. **GitHub Pages 활성화**
-   - 저장소 → `Settings` → 좌측 `Pages`
-   - Source: `Deploy from a branch`
-   - Branch: `main` / `/(root)` → `Save`
-   - 약 1~2분 후 `https://[내아이디].github.io/trpg-library/` 접속 가능
-
-### 방법 B — Git 명령어로 배포
-
-```bash
-# 1. 이 폴더에서 터미널 열기
-git init
-git add index.html README.md
-git commit -m "Initial commit: ARCANE SHELF"
-
-# 2. GitHub에서 새 저장소 생성 후:
-git remote add origin https://github.com/[내아이디]/trpg-library.git
-git branch -M main
-git push -u origin main
-
-# 3. GitHub Pages는 Settings > Pages에서 활성화
-```
-
----
-
 ## 📦 사용된 라이브러리 (CDN — 별도 설치 불필요)
 
 | 라이브러리 | 버전 | 역할 |
